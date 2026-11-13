@@ -177,19 +177,6 @@ const gridColumns = IS_WEB ? 4 : (SCREEN_WIDTH < 600 ? COLUMNS_MOBILE : SCREEN_W
 
   return (
     <View style={styles.container}>
-      {IS_WEB && (
-        <View style={styles.webHeader}>
-          <View style={styles.webHeaderLeft}>
-            <Text style={styles.webHeaderTitle}>wiiw</Text>
-          </View>
-          <View style={styles.webHeaderRight}>
-            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Inicio')}>Inicio</Text>
-            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Buscar')}>Buscar</Text>
-            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Crear')}>Crear</Text>
-            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Perfil')}>Perfil</Text>
-          </View>
-        </View>
-      )}
       {IS_WEB ? (
         <View style={styles.webGridContainer}>
           <FlatList
@@ -334,19 +321,6 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: COLORS.white, fontWeight: '600' },
   secondaryButton: { backgroundColor: COLORS.accentSoft, borderRadius: 8, padding: 12, alignItems: 'center' },
   secondaryButtonText: { color: COLORS.accent, fontWeight: '600' },
-  webHeader: {
-    backgroundColor: COLORS.surface,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  webHeaderTitle: { color: COLORS.text, fontSize: 24, fontWeight: 'bold' },
-  webHeaderRight: { flexDirection: 'row', gap: 20 },
-  webHeaderLink: { color: COLORS.muted, fontSize: 14 },
-  webHeaderLinkActive: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
   webGridContainer: {
     maxWidth: 1000,
     alignSelf: 'center',
