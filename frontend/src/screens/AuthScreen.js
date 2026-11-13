@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { supabase } from '../config/supabase';
 
 export default function AuthScreen({ navigation }) {
@@ -13,10 +13,13 @@ export default function AuthScreen({ navigation }) {
 
   const handleAuth = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Ingresa email y contraseña');
+      setErrorMessage('Ingresa email y contraseña');
+      setShowError(true);
       return;
     }
     setLoading(true);
+    setErrorMessage('');
+    setShowError(false);
     try {
       if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -30,8 +33,8 @@ export default function AuthScreen({ navigation }) {
         }
       } else {
         if (!username) {
-          Alert.alert('Error', 'Ingresa un nombre de usuario');
-          setLoading(false);
+          setErrorMessage('Ingresa un nombre de usuario');
+          setShowError(true);
           return;
         }
         const { data, error } = await supabase.auth.signUp({ email, password });
@@ -53,7 +56,8 @@ export default function AuthScreen({ navigation }) {
           } catch (upsertError) {
             console.error('Error creando perfil:', upsertError.message);
           }
-          Alert.alert('Registro', 'Revisa tu correo para confirmar o inicia sesión');
+          setErrorMessage('Revisa tu correo para confirmar o inicia sesión');
+          setShowError(false);
           setIsLogin(true);
         }
       }
@@ -100,9 +104,11 @@ export default function AuthScreen({ navigation }) {
         <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
           {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>}
         </TouchableOpacity>
-        {showError && (
-          <Alert title="Error de Autenticación" message={errorMessage} />
-        )}
+        {errorMessage ? (
+          <Text style={showError ? styles.errorText : styles.infoText}>
+            {errorMessage}
+          </Text>
+        ) : null}
         <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
           <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Inicia sesión'}</Text>
         </TouchableOpacity>
@@ -176,5 +182,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
     fontSize: 14,
+  },
+  errorText: {
+    color: '#B42318',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  infoText: {
+    color: '#372410',
+    textAlign: 'center',
+    marginTop: 12,
   },
 });

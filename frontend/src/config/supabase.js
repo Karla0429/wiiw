@@ -1,47 +1,27 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import 'react-native-url-polyfill/auto';
 
-const ExpoSecureStoreAdapter = {
-  getItem: async (key) => {
-    try {
-      const value = await SecureStore.getItemAsync(key);
-      return value || null;
-    } catch (error) {
-      console.error('SecureStore getItem error:', error);
-      return null;
-    }
-  },
-  setItem: async (key, value) => {
-    try {
-      await SecureStore.setItemAsync(key, value);
-      return true;
-    } catch (error) {
-      console.error('SecureStore setItem error:', error);
-      return false;
-    }
-  },
-  removeItem: async (key) => {
-    try {
-      await SecureStore.deleteItemAsync(key);
-      return true;
-    } catch (error) {
-      console.error('SecureStore deleteItem error:', error);
-      return false;
-    }
-  },
-};
+const authStorage = Platform.OS === 'web'
+  ? AsyncStorage
+  : {
+      getItem: (key) => SecureStore.getItemAsync(key),
+      setItem: (key, value) => SecureStore.setItemAsync(key, value),
+      removeItem: (key) => SecureStore.deleteItemAsync(key),
+    };
 
 const SUPABASE_URL = 'https://bghizbdpddqqlqzdenbd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnaGl6YmRwZGRxcWxxemRlbmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxMDg0NzMsImV4cCI6MjEwNzY4NDQ3M30.HEOGvtp1mtHXkaalXSA1jdXWVpfpoZcI8CtSf5VzyCU';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: ExpoSecureStoreAdapter,
+    storage: authStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
-    type: 'pkce',
+    detectSessionInUrl: Platform.OS === 'web',
+    flowType: 'pkce',
     storageKey: 'supabase-auth-token',
   },
 });
