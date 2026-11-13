@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image as RNImage, ScrollView } from 'react-native';
+import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet, Image as RNImage, ScrollView } from 'react-native';
+import { supabase } from '../config/supabase';
 
 export default function AuthScreen({ navigation }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -75,7 +76,7 @@ export default function AuthScreen({ navigation }) {
       <View style={styles.screenContainer}>
         <View style={styles.topBackground}>
           <RNImage
-            source={require('../assets/icon.png')}
+            source={require('../../assets/icon.png')}
             style={styles.appLogo}
           />
         </View>
@@ -109,10 +110,7 @@ export default function AuthScreen({ navigation }) {
           />
           <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
             {loading ? (
-              <RNImage
-                source={require('../assets/icon.png')}
-                style={styles.loadingIcon}
-              />
+              <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
               <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>
             )}
@@ -216,10 +214,5 @@ const styles = StyleSheet.create({
     color: '#372410',
     textAlign: 'center',
     marginTop: 12,
-  },
-  loadingIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
   },
 });
