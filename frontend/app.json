@@ -28,7 +28,8 @@
         {
           "photosPermission": "wiiw necesita acceso a tus fotos para agregar imágenes a tus historias y a tu perfil."
         }
-      ]
+      ],
+      "expo-router"
     ]
   }
 }
