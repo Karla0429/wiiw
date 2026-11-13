@@ -1,9 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, FlatList, Dimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { LogOut, Activity, Pencil, Camera, X, Settings } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
 import { selectImage, uploadImage } from '../services/imageUpload';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const AVATAR_SIZE = SCREEN_WIDTH < 600 ? 80 : 90;
+const HEADER_HEIGHT = SCREEN_WIDTH < 600 ? 160 : 200;
+const PADDING_SM = SCREEN_WIDTH < 600 ? 16 : 24;
+const PADDING_MD = SCREEN_WIDTH < 600 ? 12 : 20;
 
 export default function ProfileScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
@@ -227,35 +233,35 @@ export default function ProfileScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  header: { height: 200 },
-  banner: { height: 130, backgroundColor: COLORS.accentSoft },
-  avatarWrap: { position: 'absolute', bottom: 0, left: 24, borderRadius: 60, overflow: 'hidden', borderWidth: 3, borderColor: COLORS.background },
-  avatar: { width: 90, height: 90, backgroundColor: COLORS.surface },
-  info: { padding: 24 },
-  username: { color: COLORS.text, fontSize: 20, fontWeight: 'bold', marginTop: 12 },
+  header: { height: HEADER_HEIGHT },
+  banner: { height: SCREEN_WIDTH < 600 ? 100 : 130, backgroundColor: COLORS.accentSoft },
+  avatarWrap: { position: 'absolute', bottom: 0, left: PADDING_SM, borderRadius: 60, overflow: 'hidden', borderWidth: 3, borderColor: COLORS.background },
+  avatar: { width: AVATAR_SIZE, height: AVATAR_SIZE, backgroundColor: COLORS.surface },
+  info: { padding: PADDING_MD },
+  username: { color: COLORS.text, fontSize: SCREEN_WIDTH < 600 ? 18 : 20, fontWeight: 'bold', marginTop: 12 },
   bio: { color: COLORS.muted, marginTop: 8 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 },
-  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.surface, padding: 10, borderRadius: 8 },
+  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.surface, padding: 8, borderRadius: 6 },
   btnText: { color: COLORS.accent, fontWeight: '600' },
-  storiesHeading: { color: COLORS.text, fontSize: 18, fontWeight: 'bold', marginTop: 24 },
-  storyCard: { flexDirection: 'row', backgroundColor: COLORS.surface, borderRadius: 10, marginHorizontal: 16, marginBottom: 12, padding: 12, gap: 12 },
-  storyCover: { width: 62, height: 86, borderRadius: 6 },
+  storiesHeading: { color: COLORS.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold', marginTop: 20 },
+  storyCard: { flexDirection: 'row', backgroundColor: COLORS.surface, borderRadius: 10, marginHorizontal: PADDING_SM, marginBottom: 12, padding: 10, gap: 10 },
+  storyCover: { width: SCREEN_WIDTH < 600 ? 50 : 62, height: SCREEN_WIDTH < 600 ? 68 : 86, borderRadius: SCREEN_WIDTH < 600 ? 5 : 6 },
   storyInfo: { flex: 1 },
-  storyTitle: { color: COLORS.text, fontWeight: 'bold', fontSize: 16 },
-  storyStatus: { color: COLORS.muted, marginTop: 4, fontSize: 12 },
-  storyActions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 10 },
-  storyButton: { backgroundColor: COLORS.accentSoft, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
-  storyButtonText: { color: COLORS.accent, fontSize: 12, fontWeight: '600' },
-  empty: { textAlign: 'center', color: COLORS.muted, padding: 20 },
-  listContent: { paddingBottom: 24 },
-  modalWrap: { flex: 1, backgroundColor: COLORS.scrim, justifyContent: 'center', padding: 20 },
-  modal: { backgroundColor: COLORS.background, borderRadius: 12, padding: 20 },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  modalTitle: { color: COLORS.text, fontSize: 18, fontWeight: 'bold' },
-  avatarPicker: { alignSelf: 'center', marginBottom: 8 },
-  avatarPreview: { width: 110, height: 110, borderRadius: 55, backgroundColor: COLORS.surface },
-  cameraBadge: { position: 'absolute', right: 0, bottom: 0, backgroundColor: COLORS.accentSoft, width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  helper: { color: COLORS.muted, textAlign: 'center', fontSize: 12, marginBottom: 14 },
-  input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 8, padding: 12, textAlignVertical: 'top' },
-  modalActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  storyTitle: { color: COLORS.text, fontWeight: 'bold', fontSize: SCREEN_WIDTH < 600 ? 14 : 16 },
+  storyStatus: { color: COLORS.muted, marginTop: 4, fontSize: SCREEN_WIDTH < 600 ? 10 : 12 },
+  storyActions: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginTop: 8 },
+  storyButton: { backgroundColor: COLORS.accentSoft, paddingHorizontal: SCREEN_WIDTH < 600 ? 8 : 10, paddingVertical: SCREEN_WIDTH < 600 ? 4 : 6, borderRadius: SCREEN_WIDTH < 600 ? 5 : 6 },
+  storyButtonText: { color: COLORS.accent, fontSize: SCREEN_WIDTH < 600 ? 10 : 12, fontWeight: '600' },
+  empty: { textAlign: 'center', color: COLORS.muted, padding: SCREEN_WIDTH < 600 ? 16 : 20 },
+  listContent: { paddingBottom: 20 },
+  modalWrap: { flex: 1, backgroundColor: COLORS.scrim, justifyContent: 'flex-end', padding: PADDING_SM },
+  modal: { backgroundColor: COLORS.background, borderRadius: 10, padding: PADDING_SM },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  modalTitle: { color: COLORS.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold' },
+  avatarPicker: { alignSelf: 'center', marginBottom: 6 },
+  avatarPreview: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2, backgroundColor: COLORS.surface },
+  cameraBadge: { position: 'absolute', right: 0, bottom: 0, backgroundColor: COLORS.accentSoft, width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  helper: { color: COLORS.muted, textAlign: 'center', fontSize: SCREEN_WIDTH < 600 ? 10 : 12, marginBottom: 10 },
+  input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 6, padding: 10, textAlignVertical: 'top' },
+  modalActions: { flexDirection: 'row', gap: 8, marginTop: 12 },
 });

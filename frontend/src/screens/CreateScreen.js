@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Plus, Pencil, BookOpen } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const FAB_RIGHT = SCREEN_WIDTH < 600 ? 16 : 20;
+const FAB_BOTTOM = SCREEN_WIDTH < 600 ? 16 : 20;
+const FAB_SIZE = SCREEN_WIDTH < 600 ? 48 : 56;
+const FAB_SPEED = SCREEN_WIDTH < 600 ? 28 : 28;
 
 export default function CreateScreen({ navigation }) {
   const [stories, setStories] = useState([]);
@@ -53,7 +59,7 @@ export default function CreateScreen({ navigation }) {
         contentContainerStyle={{ padding: 16 }}
       />
       <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('StoryForm')}>
-        <Plus color={COLORS.white} size={28} />
+        <Plus color={COLORS.white} size={FAB_SPEED} />
       </TouchableOpacity>
     </View>
   );
@@ -68,5 +74,5 @@ const styles = StyleSheet.create({
   cardTitle: { color: COLORS.text, fontSize: 16, fontWeight: 'bold' },
   cardStatus: { color: COLORS.muted, marginTop: 4 },
   editBtn: { padding: 8, marginLeft: 8 },
-  fab: { position: 'absolute', right: 20, bottom: 20, backgroundColor: COLORS.accent, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+  fab: { position: 'absolute', right: FAB_RIGHT, bottom: FAB_BOTTOM, backgroundColor: COLORS.accent, width: FAB_SIZE, height: FAB_SIZE, borderRadius: FAB_SIZE / 2, alignItems: 'center', justifyContent: 'center' },
 });

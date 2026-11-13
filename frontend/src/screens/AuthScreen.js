@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Dimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { COLORS } from '../config/theme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IS_TABLET = SCREEN_WIDTH < 768 ? false : SCREEN_WIDTH < 1400 ? true : false;
 
 export default function AuthScreen({ navigation }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,7 +33,11 @@ export default function AuthScreen({ navigation }) {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         if (data.user) {
-          await supabase.from('profiles').upsert({ id: data.user.id, username, updated_at: new Date() });
+          try {
+            await supabase.from('profiles').upsert({ id: data.user.id, username, updated_at: new Date() });
+          } catch (upsertError) {
+            console.error('Error uploading profile, but auth succeeded:', upsertError.message);
+          }
         }
         Alert.alert('Registro', 'Revisa tu correo para confirmar o inicia sesión');
         setIsLogin(true);
@@ -76,18 +83,18 @@ export default function AuthScreen({ navigation }) {
         {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-        <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}</Text>
+        <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Inicia sesión'}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background, justifyContent: 'center', padding: 24 },
-  title: { fontSize: 42, color: COLORS.text, textAlign: 'center', fontWeight: 'bold', marginBottom: 8 },
-  subtitle: { fontSize: 18, color: COLORS.muted, textAlign: 'center', marginBottom: 32 },
+  container: { flex: 1, backgroundColor: COLORS.background, justifyContent: 'center', padding: IS_TABLET ? 32 : 24 },
+  title: { fontSize: IS_TABLET ? 50 : 42, color: COLORS.text, textAlign: 'center', fontWeight: 'bold', marginBottom: 8 },
+  subtitle: { fontSize: IS_TABLET ? 24 : 18, color: COLORS.muted, textAlign: 'center', marginBottom: IS_TABLET ? 32 : 32 },
   input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 8, padding: 12, marginBottom: 16 },
-  button: { backgroundColor: COLORS.accent, padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
+  button: { backgroundColor: COLORS.accent, padding: IS_TABLET ? 18 : 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
   buttonText: { color: COLORS.white, fontWeight: 'bold' },
-  switchText: { color: COLORS.accent, textAlign: 'center', marginTop: 16 },
+  switchText: { color: COLORS.accent, textAlign: 'center', marginTop: IS_TABLET ? 24 : 16 },
 });

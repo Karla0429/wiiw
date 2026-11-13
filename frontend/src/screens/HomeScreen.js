@@ -1,8 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Share, Image, Modal, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Share, Image, Modal, ScrollView, ActivityIndicator, Alert, Dimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Heart, MessageCircle, Share2, Eye, X } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const COLUMNS_MOBILE = 2;
+const COLUMNS_TABLET = 3;
+const COLUMNS_DESKTOP = 4;
 
 export default function HomeScreen({ navigation }) {
   const [stories, setStories] = useState([]);
@@ -177,9 +182,9 @@ export default function HomeScreen({ navigation }) {
           data={stories}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          columnWrapperStyle={{ gap: 12, paddingHorizontal: 16 }}
-          contentContainerStyle={{ gap: 12, paddingBottom: 20 }}
+          numColumns={SCREEN_WIDTH < 600 ? COLUMNS_MOBILE : SCREEN_WIDTH < 1024 ? COLUMNS_TABLET : COLUMNS_DESKTOP}
+          columnWrapperStyle={{ gap: SCREEN_WIDTH < 600 ? 12 : SCREEN_WIDTH < 1024 ? 16 : 20, paddingHorizontal: SCREEN_WIDTH < 600 ? 16 : 24 }}
+          contentContainerStyle={{ gap: SCREEN_WIDTH < 600 ? 12 : SCREEN_WIDTH < 1024 ? 16 : 20, paddingBottom: 20 }}
         />
       )}
 
