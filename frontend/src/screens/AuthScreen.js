@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Dimensions, Button } from 'react-native';
 import { supabase } from '../config/supabase';
 import { COLORS } from '../config/theme';
 
@@ -12,6 +12,8 @@ export default function AuthScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -21,9 +23,15 @@ export default function AuthScreen({ navigation }) {
     setLoading(true);
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigation.replace('Main');
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setErrorMessage(error.message);
+          setShowError(true);
+          throw error;
+        }
+        if (data.user) {
+          navigation.replace('Main');
+        }
       } else {
         if (!username) {
           Alert.alert('Error', 'Ingresa un nombre de usuario');
@@ -31,19 +39,31 @@ export default function AuthScreen({ navigation }) {
           return;
         }
         const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
+        if (error) {
+          setErrorMessage(error.message);
+          setShowError(true);
+          throw error;
+        }
         if (data.user) {
           try {
-            await supabase.from('profiles').upsert({ id: data.user.id, username, updated_at: new Date() });
+            const { error: profileError } = await supabase.from('profiles').upsert({
+              id: data.user.id,
+              username,
+              updated_at: new Date().toISOString(),
+            });
+            if (profileError) {
+              console.warn('Perfil no creado (aunque el usuario sí):', profileError.message);
+              // Continuamos aunque el perfil falle - el usuario ya puede usar la app
+            }
           } catch (upsertError) {
-            console.error('Error uploading profile, but auth succeeded:', upsertError.message);
+            console.error('Error creando perfil:', upsertError.message);
           }
+          Alert.alert('Registro', 'Revisa tu correo para confirmar o inicia sesión');
+          setIsLogin(true);
         }
-        Alert.alert('Registro', 'Revisa tu correo para confirmar o inicia sesión');
-        setIsLogin(true);
       }
     } catch (err) {
-      Alert.alert('Error', err.message);
+      console.error('Error en auth:', err);
     } finally {
       setLoading(false);
     }
@@ -82,8 +102,11 @@ export default function AuthScreen({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
         {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>}
       </TouchableOpacity>
+      {showError && (
+        <Alert title="Error de Autenticación" message={errorMessage} />
+      )}
       <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-        <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Inicia sesión'}</Text>
+        <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}</Text>
       </TouchableOpacity>
     </View>
   );
