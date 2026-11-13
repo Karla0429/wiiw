@@ -80,7 +80,6 @@ export default function AuthScreen({ navigation }) {
             source={require('../../assets/icon.png')}
             style={styles.appLogo}
           />
-          <Text style={styles.appName}>wiiw</Text>
         </View>
         <View style={styles.cardContainer}>
           <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
@@ -160,15 +159,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   appLogo: {
-    width: 64,
-    height: 64,
-  },
-  appName: {
-    color: '#372410',
-    fontSize: 24,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-    marginTop: 10,
+    width: 80,
+    height: 80,
   },
   cardContainer: {
     width: '100%',
