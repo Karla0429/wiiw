@@ -70,6 +70,7 @@ export default function AuthScreen({ navigation }) {
 
   return (
     <ScrollView
+      style={styles.scrollView}
       contentContainerStyle={styles.scrollContainer}
       keyboardShouldPersistTaps="handled"
     >
@@ -79,6 +80,7 @@ export default function AuthScreen({ navigation }) {
             source={require('../../assets/icon.png')}
             style={styles.appLogo}
           />
+          <Text style={styles.appName}>wiiw</Text>
         </View>
         <View style={styles.cardContainer}>
           <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
@@ -132,37 +134,50 @@ export default function AuthScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#E8D8C8',
+  },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
+    backgroundColor: '#E8D8C8',
   },
   screenContainer: {
-    flex: 1,
-    overflow: 'hidden',
+    flexGrow: 1,
     backgroundColor: '#E8D8C8',
     width: '100%',
+    minHeight: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 36,
   },
   topBackground: {
-    flex: 0.4,
+    width: '100%',
     backgroundColor: '#E8D8C8',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    marginBottom: 24,
   },
   appLogo: {
-    width: 80,
-    height: 80,
-    marginBottom: 16,
+    width: 64,
+    height: 64,
+  },
+  appName: {
+    color: '#372410',
+    fontSize: 24,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginTop: 10,
   },
   cardContainer: {
-    width: 350,
+    width: '100%',
+    maxWidth: 400,
     alignSelf: 'center',
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    borderRadius: 28,
     padding: 32,
-    paddingTop: 20,
+    paddingTop: 28,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
