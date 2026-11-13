@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Share, Image, Modal, ScrollView, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Share, Image, Modal, ScrollView, ActivityIndicator, Alert, Dimensions, Platform } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Heart, MessageCircle, Share2, Eye, X } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IS_WEB = Platform.OS === 'web';
 const COLUMNS_MOBILE = 2;
 const COLUMNS_TABLET = 3;
 const COLUMNS_DESKTOP = 4;
@@ -170,13 +171,36 @@ export default function HomeScreen({ navigation }) {
 
   const detailLike = selectedStory ? (likes[selectedStory.id] || { count: 0, liked: false }) : { count: 0, liked: false };
 
+const gridColumns = IS_WEB ? 4 : (SCREEN_WIDTH < 600 ? COLUMNS_MOBILE : SCREEN_WIDTH < 1024 ? COLUMNS_TABLET : COLUMNS_DESKTOP);
+  const columnGap = IS_WEB ? 20 : (SCREEN_WIDTH < 600 ? 12 : SCREEN_WIDTH < 1024 ? 16 : 20);
+  const horizontalPadding = IS_WEB ? 24 : (SCREEN_WIDTH < 600 ? 16 : 24);
+
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.header}>wiiw</Text>
-      </View>
-      {loading ? (
-        <ActivityIndicator color={COLORS.accent} style={{ marginTop: 40 }} />
+      {IS_WEB && (
+        <View style={styles.webHeader}>
+          <View style={styles.webHeaderLeft}>
+            <Text style={styles.webHeaderTitle}>wiiw</Text>
+          </View>
+          <View style={styles.webHeaderRight}>
+            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Inicio')}>Inicio</Text>
+            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Buscar')}>Buscar</Text>
+            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Crear')}>Crear</Text>
+            <Text style={styles.webHeaderLink} onPress={() => navigation.navigate('Perfil')}>Perfil</Text>
+          </View>
+        </View>
+      )}
+      {IS_WEB ? (
+        <View style={styles.webGridContainer}>
+          <FlatList
+            data={stories}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={gridColumns}
+            columnWrapperStyle={{ gap: columnGap, paddingHorizontal: horizontalPadding }}
+            contentContainerStyle={{ gap: columnGap, paddingBottom: 20 }}
+          />
+        </View>
       ) : (
         <FlatList
           data={stories}
@@ -186,6 +210,14 @@ export default function HomeScreen({ navigation }) {
           columnWrapperStyle={{ gap: SCREEN_WIDTH < 600 ? 12 : SCREEN_WIDTH < 1024 ? 16 : 20, paddingHorizontal: SCREEN_WIDTH < 600 ? 16 : 24 }}
           contentContainerStyle={{ gap: SCREEN_WIDTH < 600 ? 12 : SCREEN_WIDTH < 1024 ? 16 : 20, paddingBottom: 20 }}
         />
+      )}
+      {loading && !IS_WEB && (
+        <ActivityIndicator color={COLORS.accent} style={{ marginTop: 40 }} />
+      )}
+      {IS_WEB ? (
+        <ActivityIndicator color={COLORS.accent} style={{ marginTop: 20 }} />
+      ) : (
+        <ActivityIndicator color={COLORS.accent} style={{ marginTop: 40 }} />
       )}
 
       <Modal
@@ -302,4 +334,23 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: COLORS.white, fontWeight: '600' },
   secondaryButton: { backgroundColor: COLORS.accentSoft, borderRadius: 8, padding: 12, alignItems: 'center' },
   secondaryButtonText: { color: COLORS.accent, fontWeight: '600' },
+  webHeader: {
+    backgroundColor: COLORS.surface,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  webHeaderTitle: { color: COLORS.text, fontSize: 24, fontWeight: 'bold' },
+  webHeaderRight: { flexDirection: 'row', gap: 20 },
+  webHeaderLink: { color: COLORS.muted, fontSize: 14 },
+  webHeaderLinkActive: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
+  webGridContainer: {
+    maxWidth: 1000,
+    alignSelf: 'center',
+    width: '100%',
+    padding: 20,
+  },
 });
