@@ -1,5 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -22,6 +23,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
+  const isWeb = Platform.OS === 'web';
   return (
     <Tab.Navigator
       screenOptions={{
@@ -29,6 +31,7 @@ function MainTabs() {
         tabBarStyle: { backgroundColor: COLORS.background, borderTopColor: COLORS.border },
         tabBarActiveTintColor: COLORS.accent,
         tabBarInactiveTintColor: COLORS.muted,
+        tabBarPosition: isWeb ? 'top' : 'bottom',
       }}
     >
       <Tab.Screen name="Inicio" component={HomeScreen} options={{ tabBarIcon: ({ color, size }) => <Home color={color} size={size} /> }} />
