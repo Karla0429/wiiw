@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { supabase } from '../config/supabase';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image as RNImage } from 'react-native';
 
 export default function AuthScreen({ navigation }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -70,8 +69,11 @@ export default function AuthScreen({ navigation }) {
 
   return (
     <View style={styles.screenContainer}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.appTitle}>wiiw</Text>
+      <View style={styles.topBackground}>
+        <RNImage
+          source={require('../assets/logo.png')}
+          style={styles.logo}
+        />
       </View>
       <View style={styles.cardContainer}>
         <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
@@ -102,7 +104,14 @@ export default function AuthScreen({ navigation }) {
           secureTextEntry
         />
         <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
-          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>}
+          {loading ? (
+            <RNImage
+              source={require('../assets/spinner.png')}
+              style={styles.activityIndicator}
+            />
+          ) : (
+            <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>
+          )}
         </TouchableOpacity>
         {errorMessage ? (
           <Text style={showError ? styles.errorText : styles.infoText}>
@@ -110,7 +119,7 @@ export default function AuthScreen({ navigation }) {
           </Text>
         ) : null}
         <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-          <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Inicia sesión'}</Text>
+          <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Iniciar sesión'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -120,55 +129,57 @@ export default function AuthScreen({ navigation }) {
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  titleContainer: {
-    paddingTop: 40,
-    paddingBottom: 30,
-  },
-  appTitle: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#372410',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  cardContainer: {
+    overflow: 'hidden',
     backgroundColor: '#E8D8C8',
-    borderRadius: 16,
-    padding: 24,
+  },
+  topBackground: {
+    flex: 0.5,
+    backgroundColor: '#E8D8C8',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+  },
+  cardContainer: {
+    flex: 0.5,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    padding: 32,
+    paddingTop: 20,
     marginHorizontal: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
-    elevation: 4,
+    elevation: 6,
   },
   title: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#372410',
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 24,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F0EB',
     color: '#292521',
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 15,
+    padding: 14,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#A8927C',
+    borderWidth: 0,
     width: '100%',
   },
   button: {
-    backgroundColor: '#54391C',
+    backgroundColor: '#372410',
+    borderRadius: 30,
     padding: 14,
-    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 24,
     width: '100%',
   },
   buttonText: {
@@ -192,5 +203,11 @@ const styles = StyleSheet.create({
     color: '#372410',
     textAlign: 'center',
     marginTop: 12,
+  },
+  activityIndicator: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: [{ translateX: -12 }, { translateY: -12 }],
   },
 });
