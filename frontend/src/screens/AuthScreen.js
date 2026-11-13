@@ -69,11 +69,8 @@ export default function AuthScreen({ navigation }) {
 
   return (
     <View style={styles.screenContainer}>
-      <View style={styles.topBackground}>
-        <RNImage
-          source={require('../assets/logo.png')}
-          style={styles.logo}
-        />
+      <View style={styles.titleContainer}>
+        <Text style={styles.appTitle}>wiiw</Text>
       </View>
       <View style={styles.cardContainer}>
         <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
@@ -130,19 +127,19 @@ const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: '#E8D8C8',
+    backgroundColor: '#FFFFFF',
   },
-  topBackground: {
-    flex: 0.5,
-    backgroundColor: '#E8D8C8',
+  titleContainer: {
+    paddingTop: 40,
+    paddingBottom: 30,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
   },
-  logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
+  appTitle: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: '#372410',
+    textAlign: 'center',
+    marginBottom: 8,
   },
   cardContainer: {
     flex: 0.5,
