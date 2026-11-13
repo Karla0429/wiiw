@@ -8,7 +8,7 @@ import { Home, Search, PlusSquare, User } from 'lucide-react-native';
 
 import { ReaderPreferencesProvider } from './src/context/ReaderPreferencesContext';
 import { COLORS } from './src/config/theme';
-import AuthScreen from './src/screens/AuthScreen';
+import AuthScreen from './src/app/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SearchScreen from './src/screens/SearchScreen';
 import CreateScreen from './src/screens/CreateScreen';

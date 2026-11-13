@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image as RNImage } from 'react-native';
+import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { supabase } from '../config/supabase';
 
 export default function AuthScreen({ navigation }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -102,10 +103,7 @@ export default function AuthScreen({ navigation }) {
         />
         <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
           {loading ? (
-            <RNImage
-              source={require('../assets/spinner.png')}
-              style={styles.activityIndicator}
-            />
+            <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>
           )}
@@ -200,11 +198,5 @@ const styles = StyleSheet.create({
     color: '#372410',
     textAlign: 'center',
     marginTop: 12,
-  },
-  activityIndicator: {
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: [{ translateX: -12 }, { translateY: -12 }],
   },
 });
