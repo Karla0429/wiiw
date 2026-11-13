@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { supabase } from '../config/supabase';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image as RNImage, ScrollView } from 'react-native';
 
 export default function AuthScreen({ navigation }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -69,78 +68,97 @@ export default function AuthScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.screenContainer}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.appTitle}>wiiw</Text>
-      </View>
-      <View style={styles.cardContainer}>
-        <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
-        {!isLogin && (
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={styles.screenContainer}>
+        <View style={styles.topBackground}>
+          <RNImage
+            source={require('../assets/icon.png')}
+            style={styles.appLogo}
+          />
+        </View>
+        <View style={styles.cardContainer}>
+          <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
+          {!isLogin && (
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre de usuario"
+              placeholderTextColor="#A8927C"
+              value={username}
+              onChangeText={setUsername}
+            />
+          )}
           <TextInput
             style={styles.input}
-            placeholder="Nombre de usuario"
+            placeholder="Email"
             placeholderTextColor="#A8927C"
-            value={username}
-            onChangeText={setUsername}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
-        )}
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#A8927C"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          placeholderTextColor="#A8927C"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>
-          )}
-        </TouchableOpacity>
-        {errorMessage ? (
-          <Text style={showError ? styles.errorText : styles.infoText}>
-            {errorMessage}
-          </Text>
-        ) : null}
-        <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-          <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Iniciar sesión'}</Text>
-        </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor="#A8927C"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
+            {loading ? (
+              <RNImage
+                source={require('../assets/icon.png')}
+                style={styles.loadingIcon}
+              />
+            ) : (
+              <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>
+            )}
+          </TouchableOpacity>
+          {errorMessage ? (
+            <Text style={showError ? styles.errorText : styles.infoText}>
+              {errorMessage}
+            </Text>
+          ) : null}
+          <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+            <Text style={styles.switchText}>
+              {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Iniciar sesión'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
   screenContainer: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#E8D8C8',
+    width: '100%',
   },
-  titleContainer: {
-    paddingTop: 40,
-    paddingBottom: 30,
+  topBackground: {
+    flex: 0.4,
+    backgroundColor: '#E8D8C8',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
-  appTitle: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#372410',
-    textAlign: 'center',
-    marginBottom: 8,
+  appLogo: {
+    width: 80,
+    height: 80,
+    marginBottom: 16,
   },
   cardContainer: {
-    flex: 0.5,
+    flex: 0.6,
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
@@ -198,5 +216,10 @@ const styles = StyleSheet.create({
     color: '#372410',
     textAlign: 'center',
     marginTop: 12,
+  },
+  loadingIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
   },
 });
