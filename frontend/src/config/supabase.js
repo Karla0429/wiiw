@@ -5,7 +5,8 @@ import 'react-native-url-polyfill/auto';
 const ExpoSecureStoreAdapter = {
   getItem: async (key) => {
     try {
-      return await SecureStore.getItemAsync(key);
+      const value = await SecureStore.getItemAsync(key);
+      return value || null;
     } catch (error) {
       console.error('SecureStore getItem error:', error);
       return null;
@@ -14,10 +15,10 @@ const ExpoSecureStoreAdapter = {
   setItem: async (key, value) => {
     try {
       await SecureStore.setItemAsync(key, value);
-      return value;
+      return true;
     } catch (error) {
       console.error('SecureStore setItem error:', error);
-      return null;
+      return false;
     }
   },
   removeItem: async (key) => {
@@ -41,5 +42,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     persistSession: true,
     detectSessionInUrl: false,
     type: 'pkce',
+    storageKey: 'supabase-auth-token',
   },
 });

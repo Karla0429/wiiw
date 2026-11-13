@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Dimensions, Button } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { supabase } from '../config/supabase';
-import { COLORS } from '../config/theme';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const IS_TABLET = SCREEN_WIDTH < 768 ? false : SCREEN_WIDTH < 1400 ? true : false;
 
 export default function AuthScreen({ navigation }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -53,7 +49,6 @@ export default function AuthScreen({ navigation }) {
             });
             if (profileError) {
               console.warn('Perfil no creado (aunque el usuario sí):', profileError.message);
-              // Continuamos aunque el perfil falle - el usuario ya puede usar la app
             }
           } catch (upsertError) {
             console.error('Error creando perfil:', upsertError.message);
@@ -70,54 +65,116 @@ export default function AuthScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>wiiw</Text>
-      <Text style={styles.subtitle}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
-      {!isLogin && (
+    <View style={styles.screenContainer}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.appTitle}>wiiw</Text>
+      </View>
+      <View style={styles.cardContainer}>
+        <Text style={styles.title}>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</Text>
+        {!isLogin && (
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre de usuario"
+            placeholderTextColor="#A8927C"
+            value={username}
+            onChangeText={setUsername}
+          />
+        )}
         <TextInput
           style={styles.input}
-          placeholder="Nombre de usuario"
-          placeholderTextColor={COLORS.muted}
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Email"
+          placeholderTextColor="#A8927C"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
-      )}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor={COLORS.muted}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor={COLORS.muted}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
-        {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>}
-      </TouchableOpacity>
-      {showError && (
-        <Alert title="Error de Autenticación" message={errorMessage} />
-      )}
-      <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-        <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}</Text>
-      </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Contraseña"
+          placeholderTextColor="#A8927C"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
+          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>}
+        </TouchableOpacity>
+        {showError && (
+          <Alert title="Error de Autenticación" message={errorMessage} />
+        )}
+        <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+          <Text style={styles.switchText}>{isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tiene cuenta? Inicia sesión'}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background, justifyContent: 'center', padding: IS_TABLET ? 32 : 24 },
-  title: { fontSize: IS_TABLET ? 50 : 42, color: COLORS.text, textAlign: 'center', fontWeight: 'bold', marginBottom: 8 },
-  subtitle: { fontSize: IS_TABLET ? 24 : 18, color: COLORS.muted, textAlign: 'center', marginBottom: IS_TABLET ? 32 : 32 },
-  input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 8, padding: 12, marginBottom: 16 },
-  button: { backgroundColor: COLORS.accent, padding: IS_TABLET ? 18 : 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
-  buttonText: { color: COLORS.white, fontWeight: 'bold' },
-  switchText: { color: COLORS.accent, textAlign: 'center', marginTop: IS_TABLET ? 24 : 16 },
+  screenContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  titleContainer: {
+    paddingTop: 40,
+    paddingBottom: 30,
+  },
+  appTitle: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: '#372410',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  cardContainer: {
+    backgroundColor: '#E8D8C8',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#372410',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    color: '#292521',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#A8927C',
+    width: '100%',
+  },
+  button: {
+    backgroundColor: '#54391C',
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+    width: '100%',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  switchText: {
+    color: '#A8927C',
+    textAlign: 'center',
+    marginTop: 16,
+    fontSize: 14,
+  },
 });
