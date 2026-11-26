@@ -15,7 +15,11 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.k4rlalop0z.frontend"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,6 +34,16 @@
         }
       ],
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "52406a9c-8aa0-495e-8474-e6fa32a5d4d6"
+      }
+    }
   }
 }
