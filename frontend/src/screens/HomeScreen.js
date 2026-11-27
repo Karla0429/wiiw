@@ -8,6 +8,7 @@ const IS_WEB = Platform.OS === 'web';
 const COLUMNS_MOBILE = 2;
 const COLUMNS_TABLET = 3;
 const COLUMNS_DESKTOP = 4;
+const COLUMNS_WIDE = 5;
 
 export default function HomeScreen({ navigation }) {
   const { width: screenWidth } = useWindowDimensions();
@@ -176,24 +177,32 @@ export default function HomeScreen({ navigation }) {
     const like = likes[item.id] || { count: 0, liked: false };
     return (
       <TouchableOpacity style={styles.card} onPress={() => openStory(item)} activeOpacity={0.85}>
-        {item.cover_url ? <Image source={{ uri: item.cover_url }} style={styles.cover} /> : <View style={styles.cover} />}
-        <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
-        <View style={styles.meta}>
-          <View style={styles.metaItem}>
-            <Eye color={COLORS.muted} size={14} />
-            <Text style={styles.metaText}>{item.views_count || 0}</Text>
+        {item.cover_url ? (
+          <Image source={{ uri: item.cover_url }} style={styles.coverImage} resizeMode="cover" />
+        ) : (
+          <View style={[styles.cover, styles.coverPlaceholder]}>
+            <BookOpen color={COLORS.accent} size={32} />
           </View>
-          {item.status === 'published' ? <TouchableOpacity style={styles.metaItem} onPress={() => toggleLike(item.id)} hitSlop={8}>
-          <Heart color={like.liked ? COLORS.accent : COLORS.muted} fill={like.liked ? COLORS.accent : 'transparent'} size={14} />
-            <Text style={styles.metaText}>{like.count}</Text>
-          </TouchableOpacity> : <Text style={styles.draftLabel}>Borrador</Text>}
-          {item.status === 'published' ? <TouchableOpacity style={styles.metaItem} onPress={() => openStory(item)} hitSlop={8}>
-          <MessageCircle color={COLORS.muted} size={14} />
-            <Text style={styles.metaText}>{commentCounts[item.id] || 0}</Text>
-          </TouchableOpacity> : null}
-          <TouchableOpacity style={styles.metaItem} onPress={() => shareStory(item.title)} hitSlop={8}>
-            <Share2 color={COLORS.muted} size={14} />
-          </TouchableOpacity>
+        )}
+        <View style={styles.cardOverlay}>
+          <Text style={styles.title} numberOfLines={2}>{item.title || 'Sin título'}</Text>
+          <View style={styles.meta}>
+            <View style={styles.metaItem}>
+              <Eye color={COLORS.white} size={14} />
+              <Text style={styles.metaText}>{item.views_count || 0}</Text>
+            </View>
+            {item.status === 'published' ? <TouchableOpacity style={styles.metaItem} onPress={() => toggleLike(item.id)} hitSlop={8}>
+              <Heart color={COLORS.white} fill={like.liked ? COLORS.white : 'transparent'} size={14} />
+              <Text style={styles.metaText}>{like.count}</Text>
+            </TouchableOpacity> : <Text style={styles.draftLabel}>Borrador</Text>}
+            {item.status === 'published' ? <TouchableOpacity style={styles.metaItem} onPress={() => openStory(item)} hitSlop={8}>
+              <MessageCircle color={COLORS.white} size={14} />
+              <Text style={styles.metaText}>{commentCounts[item.id] || 0}</Text>
+            </TouchableOpacity> : null}
+            <TouchableOpacity style={styles.metaItem} onPress={() => shareStory(item.title)} hitSlop={8}>
+              <Share2 color={COLORS.white} size={14} />
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -201,9 +210,15 @@ export default function HomeScreen({ navigation }) {
 
   const detailLike = selectedStory ? (likes[selectedStory.id] || { count: 0, liked: false }) : { count: 0, liked: false };
 
-const gridColumns = IS_WEB ? 4 : (screenWidth < 600 ? COLUMNS_MOBILE : screenWidth < 1024 ? COLUMNS_TABLET : COLUMNS_DESKTOP);
-const columnGap = IS_WEB ? 20 : (screenWidth < 600 ? 12 : screenWidth < 1024 ? 16 : 20);
-const horizontalPadding = IS_WEB ? 24 : (screenWidth < 600 ? 16 : 24);
+  const gridColumns = screenWidth < 600
+    ? COLUMNS_MOBILE
+    : screenWidth < 900
+      ? COLUMNS_TABLET
+      : screenWidth < 1200
+        ? COLUMNS_DESKTOP
+        : COLUMNS_WIDE;
+  const columnGap = screenWidth < 600 ? 12 : screenWidth < 900 ? 16 : 20;
+  const horizontalPadding = IS_WEB ? 24 : (screenWidth < 600 ? 16 : 24);
 
   return (
     <View style={styles.container}>
@@ -225,9 +240,9 @@ const horizontalPadding = IS_WEB ? 24 : (screenWidth < 600 ? 16 : 24);
           data={stories}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
-          numColumns={screenWidth < 600 ? COLUMNS_MOBILE : screenWidth < 1024 ? COLUMNS_TABLET : COLUMNS_DESKTOP}
-          columnWrapperStyle={{ gap: screenWidth < 600 ? 12 : screenWidth < 1024 ? 16 : 20, paddingHorizontal: screenWidth < 600 ? 16 : 24 }}
-          contentContainerStyle={{ gap: screenWidth < 600 ? 12 : screenWidth < 1024 ? 16 : 20, paddingBottom: 20 }}
+          numColumns={gridColumns}
+          columnWrapperStyle={{ gap: columnGap, paddingHorizontal: horizontalPadding }}
+          contentContainerStyle={{ gap: columnGap, paddingBottom: 20 }}
         />
       )}
       {loading && !IS_WEB && (
@@ -392,13 +407,16 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 },
   header: { color: COLORS.text, fontSize: 28, fontWeight: 'bold', padding: 16 },
-  card: { flex: 1, backgroundColor: COLORS.surface, borderRadius: 8, overflow: 'hidden' },
-  cover: { height: 140, backgroundColor: COLORS.accentSoft },
-  title: { color: COLORS.text, padding: 8, fontSize: 13, fontWeight: '600' },
-  meta: { flexDirection: 'row', alignItems: 'center', padding: 8, gap: 10 },
+  card: { flex: 1, aspectRatio: 1, backgroundColor: COLORS.surface, borderRadius: 12, overflow: 'hidden' },
+  cover: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  coverImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  coverPlaceholder: { backgroundColor: COLORS.accentSoft },
+  cardOverlay: { position: 'absolute', right: 0, bottom: 0, left: 0, padding: 10, backgroundColor: 'rgba(25, 22, 19, 0.72)', gap: 6 },
+  title: { color: COLORS.white, fontSize: 14, lineHeight: 18, fontWeight: '700' },
+  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metaText: { color: COLORS.muted, fontSize: 11 },
-  draftLabel: { color: COLORS.accent, fontSize: 10, fontWeight: '600' },
+  metaText: { color: COLORS.white, fontSize: 11 },
+  draftLabel: { color: COLORS.white, fontSize: 10, fontWeight: '600' },
   modalWrap: { flex: 1, backgroundColor: COLORS.scrim, justifyContent: 'flex-end', alignItems: 'center' },
   modalWrapWide: { justifyContent: 'center', padding: 24 },
   modal: { backgroundColor: COLORS.background, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 20, maxHeight: '90%', width: '100%' },
@@ -435,7 +453,7 @@ const styles = StyleSheet.create({
   chapterRowNumber: { color: COLORS.muted, fontSize: 12 },
   chapterRowTitle: { color: COLORS.text, fontSize: 15, fontWeight: '600', marginTop: 4 },
   webGridContainer: {
-    maxWidth: 1000,
+    maxWidth: 1280,
     alignSelf: 'center',
     width: '100%',
     padding: 20,
