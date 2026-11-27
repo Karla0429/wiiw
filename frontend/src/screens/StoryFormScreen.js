@@ -21,6 +21,7 @@ export default function StoryFormScreen({ navigation, route }) {
   const [audience, setAudience] = useState(template?.audience || '');
   const [coverUrl, setCoverUrl] = useState(template?.cover_url || '');
   const [loading, setLoading] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [fetching, setFetching] = useState(isEditing);
   const [uploadingCover, setUploadingCover] = useState(false);
 
@@ -71,7 +72,7 @@ export default function StoryFormScreen({ navigation, route }) {
   };
 
   const save = async () => {
-    if (!title) {
+    if (!title.trim()) {
       Alert.alert('Error', 'El título es obligatorio');
       return;
     }
@@ -112,14 +113,47 @@ export default function StoryFormScreen({ navigation, route }) {
   };
 
   const publishStory = async () => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError) throw authError;
-    if (!user) throw new Error('Debes iniciar sesión.');
-    const storyIdToPublish = storyId || (await supabase.from('stories').select('id').eq('author_id', user.id).order('created_at', { ascending: false }).maybeSingle()).data?.id;
-    const { error } = await supabase.from('stories').update({ status: 'published' }).eq('id', storyIdToPublish);
-    if (error) throw error;
-    Alert.alert('Publicado', 'Tu historia ahora es visible para todos.');
-    navigation.goBack();
+    if (!storyId) {
+      Alert.alert('Error', 'Guarda la historia antes de publicarla.');
+      return;
+    }
+    if (!title.trim()) {
+      Alert.alert('Error', 'El título es obligatorio');
+      return;
+    }
+
+    setPublishing(true);
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!user) throw new Error('Debes iniciar sesión.');
+
+      const { data, error } = await supabase
+        .from('stories')
+        .update({
+          title,
+          description,
+          genre,
+          language,
+          characters,
+          audience,
+          cover_url: coverUrl,
+          status: 'published',
+        })
+        .eq('id', storyId)
+        .eq('author_id', user.id)
+        .select('id')
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error('No se encontró la historia o no tienes permiso para publicarla.');
+
+      Alert.alert('Publicado', 'Tu historia ahora es visible para todos.');
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Error', `No se pudo publicar la historia: ${error.message}`);
+    } finally {
+      setPublishing(false);
+    }
   };
 
   if (fetching) {
@@ -141,7 +175,7 @@ export default function StoryFormScreen({ navigation, route }) {
       <TextInput style={styles.input} placeholder="Idioma" placeholderTextColor={colors.muted} value={language} onChangeText={setLanguage} />
       <TextInput style={styles.input} placeholder="Personajes" placeholderTextColor={colors.muted} value={characters} onChangeText={setCharacters} />
       <TextInput style={styles.input} placeholder="Audiencia Objetiva" placeholderTextColor={colors.muted} value={audience} onChangeText={setAudience} />
-      <TouchableOpacity style={styles.btn} onPress={pickImage} disabled={uploadingCover || loading}>
+      <TouchableOpacity style={styles.btn} onPress={pickImage} disabled={uploadingCover || loading || publishing}>
         {uploadingCover ? (
           <ActivityIndicator color={colors.accent} />
         ) : (
@@ -149,14 +183,14 @@ export default function StoryFormScreen({ navigation, route }) {
         )}
       </TouchableOpacity>
       {coverUrl ? <Image source={{ uri: coverUrl }} style={styles.coverPreview} /> : null}
-      <TouchableOpacity style={[styles.btn, { backgroundColor: colors.accent, marginTop: 12 }]} onPress={save} disabled={loading || uploadingCover}>
+      <TouchableOpacity style={[styles.btn, { backgroundColor: colors.accent, marginTop: 12 }]} onPress={save} disabled={loading || uploadingCover || publishing}>
         {loading ? <ActivityIndicator color={colors.white} /> : <Text style={[styles.btnText, { color: colors.white }]}>{isEditing ? 'Guardar cambios' : 'Guardar y agregar capítulos'}</Text>}
       </TouchableOpacity>
-      {isEditing || !coverUrl ? null : (
-        <TouchableOpacity style={styles.btn} onPress={publishStory} disabled={loading || uploadingCover}>
-          <Text style={styles.btnText}>Publicar historia</Text>
+      {isEditing ? (
+        <TouchableOpacity style={styles.btn} onPress={publishStory} disabled={loading || uploadingCover || publishing}>
+          {publishing ? <ActivityIndicator color={colors.accent} /> : <Text style={styles.btnText}>Guardar y publicar</Text>}
         </TouchableOpacity>
-      )}
+      ) : null}
     </ScrollView>
   );
 }

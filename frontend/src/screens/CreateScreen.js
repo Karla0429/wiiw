@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Plus, Pencil, BookOpen } from 'lucide-react-native';
 import { centeredWebContent } from '../config/layout';
@@ -18,11 +18,26 @@ export default function CreateScreen({ navigation }) {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from('stories').select('*').eq('author_id', user.id).order('created_at', { ascending: false });
-        setStories(data || []);
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        Alert.alert('Error', `No se pudieron cargar tus historias: ${authError.message}`);
+        return;
       }
+      if (!user) {
+        setStories([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('stories')
+        .select('*')
+        .eq('author_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) {
+        Alert.alert('Error', `No se pudieron cargar tus historias: ${error.message}`);
+        return;
+      }
+      setStories(data || []);
     };
     load();
     const unsubscribe = navigation.addListener('focus', load);

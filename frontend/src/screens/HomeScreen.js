@@ -56,7 +56,12 @@ export default function HomeScreen({ navigation }) {
       return;
     }
 
-    const { data } = await supabase.from('likes').select('story_id, user_id').in('story_id', storyIds);
+    const { data, error } = await supabase.from('likes').select('story_id, user_id').in('story_id', storyIds);
+    if (error) {
+      Alert.alert('Error', `No se pudieron cargar los likes: ${error.message}`);
+      return;
+    }
+
     const map = {};
     storyIds.forEach((id) => {
       map[id] = { count: 0, liked: false };
@@ -78,7 +83,12 @@ export default function HomeScreen({ navigation }) {
       return;
     }
 
-    const { data } = await supabase.from('comments').select('story_id').in('story_id', storyIds);
+    const { data, error } = await supabase.from('comments').select('story_id').in('story_id', storyIds);
+    if (error) {
+      Alert.alert('Error', `No se pudieron cargar los comentarios: ${error.message}`);
+      return;
+    }
+
     const map = {};
     storyIds.forEach((id) => {
       map[id] = 0;
@@ -124,7 +134,8 @@ export default function HomeScreen({ navigation }) {
   }, [loadStories, navigation]);
 
   const incrementViews = async (id) => {
-    await supabase.rpc('increment_story_views', { p_story_id: id });
+    const { error } = await supabase.rpc('increment_story_views', { p_story_id: id });
+    if (error) console.error('No se pudo registrar la vista de la historia:', error);
   };
 
   const openStory = (story) => {
@@ -153,26 +164,33 @@ export default function HomeScreen({ navigation }) {
       },
     }));
 
-    const { data: existing } = await supabase
-      .from('likes')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('story_id', storyId)
-      .maybeSingle();
+    try {
+      const { data: existing, error: lookupError } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('story_id', storyId)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
 
-    if (existing) {
-      await supabase.from('likes').delete().eq('id', existing.id);
-    } else {
-      await supabase.from('likes').insert({ user_id: user.id, story_id: storyId });
+      const { error } = existing
+        ? await supabase.from('likes').delete().eq('id', existing.id)
+        : await supabase.from('likes').insert({ user_id: user.id, story_id: storyId });
+      if (error) throw error;
+
+      await loadLikes(stories, user);
+    } catch (error) {
+      setLikes((prev) => ({ ...prev, [storyId]: current }));
+      Alert.alert('Error', `No se pudo actualizar el like: ${error.message}`);
     }
-
-    await loadLikes(stories, user);
   };
 
   const shareStory = async (title) => {
     try {
       await Share.share({ message: `Mira esta historia en wiiw: ${title}` });
-    } catch {}
+    } catch (error) {
+      Alert.alert('Error', `No se pudo compartir la historia: ${error.message}`);
+    }
   };
 
   const renderItem = ({ item }) => {
@@ -247,14 +265,7 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={{ gap: columnGap, paddingBottom: 20 }}
         />
       )}
-      {loading && !IS_WEB && (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} />
-      )}
-      {IS_WEB ? (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: 20 }} />
-      ) : (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} />
-      )}
+      {loading ? <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} /> : null}
 
       <Modal
         visible={!!selectedStory}

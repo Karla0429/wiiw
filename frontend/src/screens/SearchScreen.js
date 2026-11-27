@@ -5,6 +5,15 @@ import { Search, BookOpen, Copy } from 'lucide-react-native';
 import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 
+const CATEGORIES = [
+  { label: 'Romance', value: 'ROMANCE' },
+  { label: 'Fantasía', value: 'FANTASIA' },
+  { label: 'Ciencia ficción', value: 'CIENCIA_FICCION' },
+  { label: 'Terror', value: 'TERROR' },
+  { label: 'Misterio', value: 'MISTERIO' },
+  { label: 'Histórico', value: 'HISTORICO' },
+];
+
 export default function SearchScreen({ navigation }) {
   const { colors } = useAppTheme();
   const styles = useAppStyles(createStyles);
@@ -12,7 +21,6 @@ export default function SearchScreen({ navigation }) {
   const [activeCategory, setActiveCategory] = useState(null);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [categories] = useState(['Romance', 'Fantástico', 'Terror', 'Misterio', 'Histórico']);
 
   useEffect(() => {
     let active = true;
@@ -62,7 +70,7 @@ export default function SearchScreen({ navigation }) {
   const sectionTitle = query.trim()
     ? 'Resultados'
     : activeCategory
-      ? `Categoría: ${activeCategory}`
+      ? `Categoría: ${CATEGORIES.find((category) => category.value === activeCategory)?.label || activeCategory}`
       : 'Historias destacadas';
 
   return (
@@ -75,13 +83,13 @@ export default function SearchScreen({ navigation }) {
         </View>
         <Text style={styles.section}>Categorías</Text>
         <View style={styles.chips}>
-          {categories.map((category) => (
+          {CATEGORIES.map((category) => (
             <TouchableOpacity
-              key={category}
-              style={[styles.chip, activeCategory === category && styles.chipActive]}
-              onPress={() => filterByCategory(category)}
+              key={category.value}
+              style={[styles.chip, activeCategory === category.value && styles.chipActive]}
+              onPress={() => filterByCategory(category.value)}
             >
-              <Text style={styles.chipText}>{category}</Text>
+              <Text style={styles.chipText}>{category.label}</Text>
             </TouchableOpacity>
           ))}
         </View>

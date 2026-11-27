@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, FlatList, Dimensions, Platform } from 'react-native';
 import { supabase } from '../config/supabase';
 import { LogOut, Activity, Pencil, Camera, X, Settings } from 'lucide-react-native';
@@ -46,36 +46,42 @@ export default function ProfileScreen({ navigation }) {
     }).eq('author_id', user.id).eq('id', storyId);
     if (error) { Alert.alert('Error', error.message); return; }
     Alert.alert('Publicado', 'Tu historia ahora es visible para todos.');
-    loadProfile();
+    setStories((previous) => previous.map((story) => (
+      story.id === storyId ? { ...story, status: 'published' } : story
+    )));
   };
 
-  const loadProfile = useCallback(async () => {
-    const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
-    if (authError) {
-      Alert.alert('Error', `No se pudo cargar el perfil: ${authError.message}`);
-      return;
-    }
-    setUser(currentUser);
-    if (!currentUser) return;
-
-    const [{ data: profileData, error: profileError }, { data: storyData, error: storyError }] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle(),
-      supabase.from('stories').select('*').eq('author_id', currentUser.id).order('created_at', { ascending: false }),
-    ]);
-    if (profileError) Alert.alert('Error', `No se pudo cargar el perfil: ${profileError.message}`);
-    else setProfile(profileData);
-    if (storyError) Alert.alert('Error', `No se pudieron cargar tus historias: ${storyError.message}`);
-    else setStories(storyData || []);
-  }, []);
-
   useEffect(() => {
+    let active = true;
+    const loadProfile = async () => {
+      const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
+      if (!active) return;
+      if (authError) {
+        Alert.alert('Error', `No se pudo cargar el perfil: ${authError.message}`);
+        return;
+      }
+      setUser(currentUser);
+      if (!currentUser) return;
+
+      const [{ data: profileData, error: profileError }, { data: storyData, error: storyError }] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle(),
+        supabase.from('stories').select('*').eq('author_id', currentUser.id).order('created_at', { ascending: false }),
+      ]);
+      if (!active) return;
+      if (profileError) Alert.alert('Error', `No se pudo cargar el perfil: ${profileError.message}`);
+      else setProfile(profileData);
+      if (storyError) Alert.alert('Error', `No se pudieron cargar tus historias: ${storyError.message}`);
+      else setStories(storyData || []);
+    };
+
     const initialLoad = setTimeout(loadProfile, 0);
     const unsubscribe = navigation.addListener('focus', loadProfile);
     return () => {
+      active = false;
       clearTimeout(initialLoad);
       unsubscribe();
     };
-  }, [loadProfile, navigation]);
+  }, [navigation]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();

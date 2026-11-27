@@ -19,11 +19,16 @@ export default function ChapterEditScreen({ navigation, route }) {
 
   const refreshChapters = useCallback(async () => {
     if (!storyId) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('chapters')
       .select('*')
       .eq('story_id', storyId)
       .order('chapter_number', { ascending: true });
+    if (error) {
+      Alert.alert('Error', `No se pudieron cargar los capítulos: ${error.message}`);
+      return;
+    }
+
     const list = data || [];
     setChapters(list);
     setChapterNumber(String(list.reduce((max, chapter) => Math.max(max, chapter.chapter_number || 0), 0) + 1));
@@ -53,14 +58,18 @@ export default function ChapterEditScreen({ navigation, route }) {
   };
 
   const save = async () => {
+    if (!storyId) {
+      Alert.alert('Error', 'No se encontró la historia para guardar el capítulo.');
+      return;
+    }
     if (!content) {
       Alert.alert('Error', 'El contenido es obligatorio');
       return;
     }
 
-    const number = parseInt(chapterNumber, 10);
-    if (Number.isNaN(number)) {
-      Alert.alert('Error', 'El número de capítulo no es válido');
+    const number = Number(chapterNumber);
+    if (!Number.isInteger(number) || number < 1) {
+      Alert.alert('Error', 'El número de capítulo debe ser un entero mayor que cero.');
       return;
     }
 

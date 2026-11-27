@@ -15,9 +15,6 @@
         "foregroundImage": "./assets/icon.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ],
       "package": "com.k4rlalop0z.frontend"
     },
     "web": {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { Alert, View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { supabase } from '../config/supabase';
 import { centeredWebContent } from '../config/layout';
 import { useAppStyles } from '../context/AppThemeContext';
@@ -15,7 +15,11 @@ export default function ActivityScreen({ navigation }) {
 
   useEffect(() => {
     const loadUser = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { user: currentUser }, error } = await supabase.auth.getUser();
+      if (error) {
+        Alert.alert('Error', `No se pudo cargar la actividad: ${error.message}`);
+        return;
+      }
       setUser(currentUser);
     };
     loadUser();
@@ -26,7 +30,12 @@ export default function ActivityScreen({ navigation }) {
 
     const load = async () => {
       if (tab === 'saved') {
-        const { data: saved } = await supabase.from('saved_items').select('*').eq('user_id', user.id);
+        const { data: saved, error } = await supabase.from('saved_items').select('*').eq('user_id', user.id);
+        if (error) {
+          Alert.alert('Error', `No se pudieron cargar los elementos guardados: ${error.message}`);
+          setData([]);
+          return;
+        }
         setData(saved || []);
       } else if (tab === 'likes') {
         setLikesCount(null);
@@ -44,7 +53,12 @@ export default function ActivityScreen({ navigation }) {
 
         setLikesCount(count);
       } else if (tab === 'comments') {
-        const { data: comments } = await supabase.from('comments').select('*').eq('user_id', user.id);
+        const { data: comments, error } = await supabase.from('comments').select('*').eq('user_id', user.id);
+        if (error) {
+          Alert.alert('Error', `No se pudieron cargar tus comentarios: ${error.message}`);
+          setData([]);
+          return;
+        }
         setData(comments || []);
       }
     };

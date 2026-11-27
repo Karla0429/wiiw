@@ -387,10 +387,10 @@ create policy stories_delete_own on public.stories for delete using (auth.uid() 
 drop policy if exists chapters_select_published_or_own on public.chapters;
 create policy chapters_select_published_or_own on public.chapters for select
 using (
-  status = 'published'
-  or exists (
+  exists (
     select 1 from public.stories s
-    where s.id = chapters.story_id and s.author_id = auth.uid()
+    where s.id = chapters.story_id
+      and (s.status = 'published' or s.author_id = auth.uid())
   )
 );
 
@@ -434,10 +434,19 @@ drop policy if exists comments_select_public on public.comments;
 create policy comments_select_public on public.comments for select
 using (
   auth.uid() = user_id
-  or story_id is null
   or exists (
     select 1 from public.stories s
     where s.id = comments.story_id and s.status = 'published'
+  )
+  or exists (
+    select 1
+    from public.chapters c
+    join public.stories s on s.id = c.story_id
+    where c.id = comments.chapter_id and s.status = 'published'
+  )
+  or exists (
+    select 1 from public.ideas i
+    where i.id = comments.idea_id
   )
 );
 
@@ -493,15 +502,28 @@ create policy storage_covers_read on storage.objects for select using (bucket_id
 
 drop policy if exists storage_covers_insert on storage.objects;
 create policy storage_covers_insert on storage.objects for insert to authenticated
-with check (bucket_id = 'covers');
+with check (
+  bucket_id = 'covers'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 drop policy if exists storage_covers_update on storage.objects;
 create policy storage_covers_update on storage.objects for update to authenticated
-using (bucket_id = 'covers') with check (bucket_id = 'covers');
+using (
+  bucket_id = 'covers'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'covers'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 drop policy if exists storage_covers_delete on storage.objects;
 create policy storage_covers_delete on storage.objects for delete to authenticated
-using (bucket_id = 'covers');
+using (
+  bucket_id = 'covers'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 drop policy if exists storage_avatars_read on storage.objects;
 create policy storage_avatars_read on storage.objects for select using (bucket_id = 'avatars');
