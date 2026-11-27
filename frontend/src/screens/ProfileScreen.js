@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, FlatList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, FlatList, Dimensions, Platform } from 'react-native';
 import { supabase } from '../config/supabase';
 import { LogOut, Activity, Pencil, Camera, X, Settings } from 'lucide-react-native';
 import { APP_THEME_OPTIONS } from '../config/theme';
@@ -7,6 +7,7 @@ import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import { selectImage, uploadImage } from '../services/imageUpload';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IS_WEB = Platform.OS === 'web';
 const AVATAR_SIZE = SCREEN_WIDTH < 600 ? 80 : 90;
 const HEADER_HEIGHT = SCREEN_WIDTH < 600 ? 160 : 200;
 const PADDING_SM = SCREEN_WIDTH < 600 ? 16 : 24;
@@ -268,25 +269,62 @@ export default function ProfileScreen({ navigation }) {
 
 const createStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  header: { height: HEADER_HEIGHT },
+  header: { height: HEADER_HEIGHT, width: IS_WEB ? '100%' : undefined },
   banner: { height: SCREEN_WIDTH < 600 ? 100 : 130, backgroundColor: colors.accentSoft },
-  avatarWrap: { position: 'absolute', bottom: 0, left: PADDING_SM, borderRadius: 60, overflow: 'hidden', borderWidth: 3, borderColor: colors.background },
+  avatarWrap: {
+    position: 'absolute',
+    bottom: 0,
+    left: IS_WEB ? '50%' : PADDING_SM,
+    transform: IS_WEB ? [{ translateX: -AVATAR_SIZE / 2 }] : undefined,
+    borderRadius: 60,
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: colors.background,
+  },
   avatar: { width: AVATAR_SIZE, height: AVATAR_SIZE, backgroundColor: colors.surface },
-  info: { padding: PADDING_MD },
+  info: { padding: PADDING_MD, alignItems: IS_WEB ? 'center' : undefined },
   username: { color: colors.text, fontSize: SCREEN_WIDTH < 600 ? 18 : 20, fontWeight: 'bold', marginTop: 12 },
   bio: { color: colors.muted, marginTop: 8 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: IS_WEB ? 'center' : undefined, gap: 12, marginTop: 20 },
   btn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surface, padding: 8, borderRadius: 6 },
   btnText: { color: colors.accent, fontWeight: '600' },
-  appearance: { marginTop: 20, backgroundColor: colors.surface, borderRadius: 10, padding: 14 },
-  appearanceTitle: { color: colors.text, fontWeight: 'bold', marginBottom: 10 },
-  appearanceOptions: { flexDirection: 'row', gap: 8 },
-  appearanceOption: { flex: 1, alignItems: 'center', backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, paddingVertical: 10, borderRadius: 8 },
+  appearance: {
+    width: IS_WEB ? '100%' : undefined,
+    maxWidth: IS_WEB ? 560 : undefined,
+    alignSelf: IS_WEB ? 'center' : undefined,
+    marginTop: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    padding: 14,
+  },
+  appearanceTitle: { color: colors.text, fontWeight: 'bold', marginBottom: 10, textAlign: IS_WEB ? 'center' : undefined },
+  appearanceOptions: { flexDirection: 'row', justifyContent: IS_WEB ? 'center' : undefined, gap: 8 },
+  appearanceOption: {
+    flex: IS_WEB ? 0 : 1,
+    width: IS_WEB ? 140 : undefined,
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
   appearanceOptionActive: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
   appearanceOptionText: { color: colors.text, fontWeight: '600' },
   appearanceOptionTextActive: { color: colors.accent },
-  storiesHeading: { color: colors.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold', marginTop: 20 },
-  storyCard: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: 10, marginHorizontal: PADDING_SM, marginBottom: 12, padding: 10, gap: 10 },
+  storiesHeading: { color: colors.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold', marginTop: 20, alignSelf: IS_WEB ? 'center' : undefined },
+  storyCard: {
+    width: IS_WEB ? '100%' : undefined,
+    maxWidth: IS_WEB ? 960 : undefined,
+    alignSelf: IS_WEB ? 'center' : undefined,
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    marginHorizontal: IS_WEB ? 0 : PADDING_SM,
+    marginBottom: 12,
+    padding: 10,
+    gap: 10,
+  },
   storyCover: { width: SCREEN_WIDTH < 600 ? 50 : 62, height: SCREEN_WIDTH < 600 ? 68 : 86, borderRadius: SCREEN_WIDTH < 600 ? 5 : 6 },
   storyInfo: { flex: 1 },
   storyTitle: { color: colors.text, fontWeight: 'bold', fontSize: SCREEN_WIDTH < 600 ? 14 : 16 },
@@ -295,7 +333,13 @@ const createStyles = (colors) => StyleSheet.create({
   storyButton: { backgroundColor: colors.accentSoft, paddingHorizontal: SCREEN_WIDTH < 600 ? 8 : 10, paddingVertical: SCREEN_WIDTH < 600 ? 4 : 6, borderRadius: SCREEN_WIDTH < 600 ? 5 : 6 },
   storyButtonText: { color: colors.accent, fontSize: SCREEN_WIDTH < 600 ? 10 : 12, fontWeight: '600' },
   empty: { textAlign: 'center', color: colors.muted, padding: SCREEN_WIDTH < 600 ? 16 : 20 },
-  listContent: { paddingBottom: 20 },
+  listContent: {
+    width: IS_WEB ? '100%' : undefined,
+    maxWidth: IS_WEB ? 1040 : undefined,
+    alignSelf: IS_WEB ? 'center' : undefined,
+    paddingHorizontal: IS_WEB ? 24 : 0,
+    paddingBottom: 20,
+  },
   modalWrap: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'flex-end', padding: PADDING_SM },
   modal: { backgroundColor: colors.background, borderRadius: 10, padding: PADDING_SM },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
