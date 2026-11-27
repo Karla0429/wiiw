@@ -26,19 +26,19 @@ const Stack = createNativeStackNavigator();
 function WebTabBar({ state, descriptors, navigation }) {
   const { width } = useWindowDimensions();
   const { colors, themeName } = useAppTheme();
-  const compact = width < 600;
+  const compact = width < 1000;
 
   return (
-    <View style={[styles.webTabBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-      <View style={styles.webTabBarBrand}>
+    <View style={[styles.webTabBar, compact && styles.webTabBarCompact, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <View style={[styles.webTabBarBrand, compact && styles.webTabBarBrandCompact]}>
         <Image
           source={themeName === 'dark'
             ? require('./assets/wiiw-logo-dark.png')
             : require('./assets/wiiw-logo.png')}
-            style={[styles.webTabBarLogo, compact && styles.webTabBarLogoCompact]}
-            resizeMode="contain"
-            accessibilityLabel="wiiw"
-          />
+          style={[styles.webTabBarLogo, compact && styles.webTabBarLogoCompact]}
+          resizeMode="contain"
+          accessibilityLabel="wiiw"
+        />
       </View>
       <View style={styles.webTabBarItems}>
         {state.routes.map((route, index) => {
@@ -69,7 +69,11 @@ function WebTabBar({ state, descriptors, navigation }) {
               accessibilityState={{ selected: focused }}
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
-              style={[styles.webTabBarButton, focused && { backgroundColor: colors.accentSoft }]}
+              style={[
+                styles.webTabBarButton,
+                compact && styles.webTabBarButtonCompact,
+                focused && { backgroundColor: colors.accentSoft },
+              ]}
             >
               {options.tabBarIcon?.({ focused, color, size: 20 })}
               {!compact && <Text style={[styles.webTabBarLabel, { color }]}>{label}</Text>}
@@ -83,16 +87,19 @@ function WebTabBar({ state, descriptors, navigation }) {
 
 function MainTabs() {
   const isWeb = Platform.OS === 'web';
+  const { width } = useWindowDimensions();
   const { colors } = useAppTheme();
+  const useDesktopWebTabBar = isWeb && width >= 900;
+
   return (
     <Tab.Navigator
-      tabBar={isWeb ? (props) => <WebTabBar {...props} /> : undefined}
+      tabBar={useDesktopWebTabBar ? (props) => <WebTabBar {...props} /> : undefined}
       screenOptions={{
         headerShown: false,
         tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
-        tabBarPosition: isWeb ? 'top' : 'bottom',
+        tabBarPosition: useDesktopWebTabBar ? 'top' : 'bottom',
       }}
     >
       <Tab.Screen name="Inicio" component={HomeScreen} options={{ tabBarIcon: ({ color, size }) => <Home color={color} size={size} /> }} />
@@ -105,6 +112,7 @@ function MainTabs() {
 
 const styles = StyleSheet.create({
   webTabBar: {
+    width: '100%',
     minHeight: 72,
     flexDirection: 'row',
     alignItems: 'center',
@@ -112,10 +120,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderBottomWidth: 1,
   },
+  webTabBarCompact: {
+    paddingHorizontal: 12,
+  },
   webTabBarBrand: {
     width: 180,
     height: 64,
     justifyContent: 'center',
+  },
+  webTabBarBrandCompact: {
+    width: 112,
   },
   webTabBarLogo: {
     width: 150,
@@ -138,6 +152,9 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 14,
     borderRadius: 10,
+  },
+  webTabBarButtonCompact: {
+    paddingHorizontal: 10,
   },
   webTabBarLabel: {
     fontSize: 14,
