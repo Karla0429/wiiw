@@ -1,5 +1,6 @@
-import { File } from 'expo-file-system';
+import { File as ExpoFile } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
+import { Platform } from 'react-native';
 import { supabase } from '../config/supabase';
 
 const IMAGE_TYPES = {
@@ -12,15 +13,27 @@ const IMAGE_TYPES = {
 export async function uploadImage({ bucket, path, asset }) {
   if (!asset?.uri) throw new Error('No se encontró el archivo de imagen seleccionado.');
 
-  const contentType = asset.mimeType || 'image/jpeg';
+  const contentType = (asset.mimeType || asset.file?.type || 'image/jpeg').toLowerCase();
   const extension = IMAGE_TYPES[contentType];
   if (!extension) throw new Error('El formato de imagen no es compatible. Usa JPG, PNG, WEBP o GIF.');
 
   const filePath = `${path}.${extension}`;
-  const bytes = await new File(asset.uri).arrayBuffer();
+  let fileData;
+  if (Platform.OS === 'web') {
+    if (asset.file) {
+      fileData = asset.file;
+    } else {
+      const response = await fetch(asset.uri);
+      if (!response.ok) throw new Error('No se pudo leer la imagen seleccionada.');
+      fileData = await response.blob();
+    }
+  } else {
+    fileData = await new ExpoFile(asset.uri).arrayBuffer();
+  }
+
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(filePath, bytes, { contentType, upsert: true });
+    .upload(filePath, fileData, { contentType, upsert: true });
 
   if (error) throw error;
   const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
