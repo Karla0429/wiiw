@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Share, Image, Modal, ScrollView, ActivityIndicator, Alert, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Share, Image, Modal, ScrollView, ActivityIndicator, Alert, Platform, useWindowDimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Heart, MessageCircle, Share2, Eye, X, BookOpen } from 'lucide-react-native';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
@@ -21,6 +21,9 @@ export default function HomeScreen({ navigation }) {
   const [selectedStory, setSelectedStory] = useState(null);
   const [detailTab, setDetailTab] = useState('summary');
   const [storyChapters, setStoryChapters] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState('');
+  const [postingComment, setPostingComment] = useState(false);
   const [loading, setLoading] = useState(true);
   const isWide = screenWidth >= 700;
 
@@ -43,7 +46,23 @@ export default function HomeScreen({ navigation }) {
       setStoryChapters(data || []);
     };
 
+    const loadComments = async () => {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('id, content, comment_text, created_at, user_id, profiles(username, avatar_url)')
+        .eq('story_id', selectedStory.id)
+        .order('created_at', { ascending: false });
+
+      if (!active) return;
+      if (error) {
+        Alert.alert('Error', `No se pudieron cargar los comentarios: ${error.message}`);
+        return;
+      }
+      setComments(data || []);
+    };
+
     loadChapterList();
+    loadComments();
     return () => {
       active = false;
     };
@@ -138,10 +157,12 @@ export default function HomeScreen({ navigation }) {
     if (error) console.error('No se pudo registrar la vista de la historia:', error);
   };
 
-  const openStory = (story) => {
+  const openStory = (story, initialTab = 'summary') => {
     const viewIncrement = story.status === 'published' ? 1 : 0;
-    setDetailTab('summary');
+    setDetailTab(initialTab);
     setStoryChapters([]);
+    setComments([]);
+    setCommentText('');
     setSelectedStory({ ...story, views_count: (story.views_count || 0) + viewIncrement });
     if (story.status === 'published') {
       setStories((prev) => prev.map((item) => (
@@ -193,6 +214,45 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  const postComment = async () => {
+    const content = commentText.trim();
+    if (!content) {
+      Alert.alert('Comentario vacío', 'Escribe algo antes de publicar.');
+      return;
+    }
+    if (!user) {
+      Alert.alert('Inicia sesión', 'Debes iniciar sesión para comentar.');
+      return;
+    }
+    if (!selectedStory) return;
+
+    setPostingComment(true);
+    try {
+      const { data, error } = await supabase
+        .from('comments')
+        .insert({
+          user_id: user.id,
+          story_id: selectedStory.id,
+          content,
+          comment_text: content,
+        })
+        .select('id, content, comment_text, created_at, user_id, profiles(username, avatar_url)')
+        .single();
+      if (error) throw error;
+
+      setComments((previous) => [data, ...previous]);
+      setCommentText('');
+      setCommentCounts((previous) => ({
+        ...previous,
+        [selectedStory.id]: (previous[selectedStory.id] || 0) + 1,
+      }));
+    } catch (error) {
+      Alert.alert('Error', `No se pudo publicar el comentario: ${error.message}`);
+    } finally {
+      setPostingComment(false);
+    }
+  };
+
   const renderItem = ({ item }) => {
     const like = likes[item.id] || { count: 0, liked: false };
     return (
@@ -215,7 +275,7 @@ export default function HomeScreen({ navigation }) {
               <Heart color={colors.white} fill={like.liked ? colors.white : 'transparent'} size={14} />
               <Text style={styles.metaText}>{like.count}</Text>
             </TouchableOpacity> : <Text style={styles.draftLabel}>Borrador</Text>}
-            {item.status === 'published' ? <TouchableOpacity style={styles.metaItem} onPress={() => openStory(item)} hitSlop={8}>
+            {item.status === 'published' ? <TouchableOpacity style={styles.metaItem} onPress={() => openStory(item, 'comments')} hitSlop={8}>
               <MessageCircle color={colors.white} size={14} />
               <Text style={styles.metaText}>{commentCounts[item.id] || 0}</Text>
             </TouchableOpacity> : null}
@@ -362,6 +422,14 @@ export default function HomeScreen({ navigation }) {
                   >
                     <Text style={[styles.detailTabText, detailTab === 'chapters' && styles.detailTabTextActive]}>Capítulos ({storyChapters.length})</Text>
                   </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.detailTab, detailTab === 'comments' && styles.detailTabActive]}
+                    onPress={() => setDetailTab('comments')}
+                  >
+                    <Text style={[styles.detailTabText, detailTab === 'comments' && styles.detailTabTextActive]}>
+                      Comentarios ({commentCounts[selectedStory.id] || comments.length})
+                    </Text>
+                  </TouchableOpacity>
                 </View>
                 {detailTab === 'summary' ? (
                   <View style={styles.detailSummary}>
@@ -378,17 +446,17 @@ export default function HomeScreen({ navigation }) {
                     <Text style={styles.detailDescription}>{selectedStory.description || 'Sin descripción'}</Text>
                     {selectedStory.characters ? <Text style={styles.detailTags}>Personajes: {selectedStory.characters}</Text> : null}
                     <View style={styles.detailFooter}>
-                      <View style={styles.metaItem}>
+                      <TouchableOpacity style={styles.metaItem} onPress={() => setDetailTab('comments')}>
                         <MessageCircle color={colors.muted} size={15} />
                         <Text style={styles.metaText}>{commentCounts[selectedStory.id] || 0}</Text>
-                      </View>
+                      </TouchableOpacity>
                       <TouchableOpacity style={styles.metaItem} onPress={() => shareStory(selectedStory.title)}>
                         <Share2 color={colors.muted} size={15} />
                         <Text style={styles.metaText}>Compartir</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
-                ) : (
+                ) : detailTab === 'chapters' ? (
                   <View style={styles.chapterList}>
                     {storyChapters.length ? storyChapters.map((chapter) => (
                       <TouchableOpacity
@@ -405,6 +473,51 @@ export default function HomeScreen({ navigation }) {
                         <Text style={styles.chapterRowTitle}>{chapter.title || 'Sin título'}</Text>
                       </TouchableOpacity>
                     )) : <Text style={styles.detailDescription}>Esta historia todavía no tiene capítulos.</Text>}
+                  </View>
+                ) : (
+                  <View style={styles.commentsSection}>
+                    <View style={styles.commentComposer}>
+                      <TextInput
+                        style={styles.commentInput}
+                        placeholder={user ? 'Escribe un comentario...' : 'Inicia sesión para comentar'}
+                        placeholderTextColor={colors.muted}
+                        value={commentText}
+                        onChangeText={setCommentText}
+                        editable={!!user && !postingComment}
+                        multiline
+                      />
+                      <TouchableOpacity
+                        style={[styles.commentButton, (!user || postingComment) && styles.commentButtonDisabled]}
+                        onPress={postComment}
+                        disabled={!user || postingComment}
+                      >
+                        {postingComment
+                          ? <ActivityIndicator color={colors.white} size="small" />
+                          : <Text style={styles.commentButtonText}>Publicar</Text>}
+                      </TouchableOpacity>
+                    </View>
+                    {comments.length ? comments.map((comment) => {
+                      const commentContent = comment.content || comment.comment_text || '';
+                      return (
+                        <View key={comment.id} style={styles.commentRow}>
+                          <View style={styles.commentAvatar}>
+                            {comment.profiles?.avatar_url ? (
+                              <Image source={{ uri: comment.profiles.avatar_url }} style={styles.commentAvatarImage} />
+                            ) : (
+                              <Text style={styles.commentAvatarText}>
+                                {(comment.profiles?.username || 'L').charAt(0).toUpperCase()}
+                              </Text>
+                            )}
+                          </View>
+                          <View style={styles.commentBody}>
+                            <Text style={styles.commentAuthor}>@{comment.profiles?.username || 'lector'}</Text>
+                            <Text style={styles.commentText}>{commentContent}</Text>
+                          </View>
+                        </View>
+                      );
+                    }) : (
+                      <Text style={styles.detailDescription}>Todavía no hay comentarios.</Text>
+                    )}
                   </View>
                 )}
               </ScrollView>
@@ -424,7 +537,7 @@ const createStyles = (colors) => StyleSheet.create({
   cover: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   coverImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   coverPlaceholder: { backgroundColor: colors.accentSoft },
-  cardOverlay: { position: 'absolute', right: 0, bottom: 0, left: 0, padding: 10, backgroundColor: 'rgba(25, 22, 19, 0.72)', gap: 6 },
+  cardOverlay: { position: 'absolute', right: 0, bottom: 0, left: 0, padding: 10, backgroundColor: colors.scrim, gap: 6 },
   title: { color: colors.white, fontSize: 14, lineHeight: 18, fontWeight: '700' },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
@@ -449,7 +562,7 @@ const createStyles = (colors) => StyleSheet.create({
   primaryButtonText: { color: colors.white, fontWeight: '600' },
   secondaryButton: { backgroundColor: colors.accentSoft, borderRadius: 8, padding: 12, alignItems: 'center' },
   secondaryButtonText: { color: colors.accent, fontWeight: '600' },
-  detailTabs: { flexDirection: 'row', gap: 28, borderBottomWidth: 1, borderBottomColor: colors.border, marginTop: 26 },
+  detailTabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 20, borderBottomWidth: 1, borderBottomColor: colors.border, marginTop: 26 },
   detailTab: { paddingVertical: 12, borderBottomWidth: 3, borderBottomColor: 'transparent' },
   detailTabActive: { borderBottomColor: colors.accent },
   detailTabText: { color: colors.muted, fontSize: 14, fontWeight: '600' },
@@ -465,6 +578,30 @@ const createStyles = (colors) => StyleSheet.create({
   chapterRow: { paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
   chapterRowNumber: { color: colors.muted, fontSize: 12 },
   chapterRowTitle: { color: colors.text, fontSize: 15, fontWeight: '600', marginTop: 4 },
+  commentsSection: { paddingTop: 16 },
+  commentComposer: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginBottom: 16 },
+  commentInput: {
+    flex: 1,
+    minHeight: 44,
+    maxHeight: 120,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  commentButton: { minWidth: 82, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 12 },
+  commentButtonDisabled: { opacity: 0.55 },
+  commentButtonText: { color: colors.white, fontWeight: '700' },
+  commentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+  commentAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  commentAvatarImage: { width: 36, height: 36 },
+  commentAvatarText: { color: colors.accent, fontWeight: '700' },
+  commentBody: { flex: 1 },
+  commentAuthor: { color: colors.accent, fontSize: 13, fontWeight: '700', marginBottom: 4 },
+  commentText: { color: colors.text, fontSize: 14, lineHeight: 20 },
   webGridContainer: {
     maxWidth: 1280,
     alignSelf: 'center',

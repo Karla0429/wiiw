@@ -94,7 +94,7 @@ export default function ActivityScreen({ navigation }) {
             keyExtractor={(item, i) => item.id?.toString() || i.toString()}
             renderItem={({ item }) => (
               <View style={styles.item}>
-                <Text style={styles.itemText}>{tab === 'comments' ? item.content : `ID: ${item.target_id || item.idea_id || item.story_id}`}</Text>
+                <Text style={styles.itemText}>{tab === 'comments' ? (item.content || item.comment_text || '') : `ID: ${item.target_id || item.idea_id || item.story_id}`}</Text>
               </View>
             )}
             contentContainerStyle={{ padding: 16 }}

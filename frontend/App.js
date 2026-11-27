@@ -96,9 +96,29 @@ function MainTabs() {
       tabBar={useDesktopWebTabBar ? (props) => <WebTabBar {...props} /> : undefined}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
+        tabBarBackground: () => (
+          <View style={{ flex: 1, backgroundColor: colors.background }} />
+        ),
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: colors.border,
+          elevation: 0,
+          shadowColor: 'transparent',
+        },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
+        tabBarActiveBackgroundColor: colors.accentSoft,
+        tabBarInactiveBackgroundColor: 'transparent',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+        tabBarItemStyle: {
+          marginHorizontal: 4,
+          marginVertical: 6,
+          borderRadius: 10,
+        },
         tabBarPosition: useDesktopWebTabBar ? 'top' : 'bottom',
       }}
     >
@@ -210,7 +230,25 @@ function AppContent() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      theme={{
+        dark: themeName === 'dark',
+        colors: {
+          primary: colors.accent,
+          background: colors.background,
+          card: colors.surface,
+          text: colors.text,
+          border: colors.border,
+          notification: colors.accent,
+        },
+        fonts: {
+          regular: { fontFamily: 'System', fontWeight: '400' },
+          medium: { fontFamily: 'System', fontWeight: '500' },
+          bold: { fontFamily: 'System', fontWeight: '700' },
+          heavy: { fontFamily: 'System', fontWeight: '800' },
+        },
+      }}
+    >
       <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
       <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
         <Stack.Screen name="Auth" component={AuthScreen} />
