@@ -31,14 +31,14 @@ function WebTabBar({ state, descriptors, navigation }) {
   return (
     <View style={[styles.webTabBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       <View style={styles.webTabBarBrand}>
-        <View style={[styles.webTabBarLogoBacking, themeName === 'dark' && styles.webTabBarLogoBackingDark]}>
-          <Image
-            source={require('./assets/wiiw-logo.png')}
+        <Image
+          source={themeName === 'dark'
+            ? require('./assets/wiiw-logo-dark.png')
+            : require('./assets/wiiw-logo.png')}
             style={[styles.webTabBarLogo, compact && styles.webTabBarLogoCompact]}
             resizeMode="contain"
             accessibilityLabel="wiiw"
           />
-        </View>
       </View>
       <View style={styles.webTabBarItems}>
         {state.routes.map((route, index) => {
@@ -120,14 +120,6 @@ const styles = StyleSheet.create({
   webTabBarLogo: {
     width: 150,
     height: 54,
-  },
-  webTabBarLogoBacking: {
-    alignSelf: 'flex-start',
-  },
-  webTabBarLogoBackingDark: {
-    backgroundColor: '#F7F5F2',
-    borderRadius: 8,
-    padding: 4,
   },
   webTabBarLogoCompact: {
     width: 100,
