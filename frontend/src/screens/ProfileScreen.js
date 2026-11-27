@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, FlatList, Dimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { LogOut, Activity, Pencil, Camera, X, Settings } from 'lucide-react-native';
-import { COLORS } from '../config/theme';
+import { APP_THEME_OPTIONS } from '../config/theme';
+import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import { selectImage, uploadImage } from '../services/imageUpload';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -12,6 +13,8 @@ const PADDING_SM = SCREEN_WIDTH < 600 ? 16 : 24;
 const PADDING_MD = SCREEN_WIDTH < 600 ? 12 : 20;
 
 export default function ProfileScreen({ navigation }) {
+  const { colors, themeName, setTheme, isLoaded: isThemeLoaded, loadError: themeLoadError } = useAppTheme();
+  const styles = useAppStyles(createStyles);
   const [profile, setProfile] = useState(null);
   const [user, setUser] = useState(null);
   const [stories, setStories] = useState([]);
@@ -20,6 +23,19 @@ export default function ProfileScreen({ navigation }) {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  useEffect(() => {
+    if (themeLoadError) Alert.alert('Error', `No se pudo cargar el tema de la aplicación: ${themeLoadError.message}`);
+  }, [themeLoadError]);
+
+  const changeTheme = async (nextTheme) => {
+    try {
+      await setTheme(nextTheme);
+    } catch (error) {
+      Alert.alert('Error', `No se pudo guardar el tema de la aplicación: ${error.message}`);
+    }
+  };
+
   const handlePublishStory = async (storyId) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) { Alert.alert('Error', 'No hay sesión activa'); return; }
@@ -138,21 +154,40 @@ export default function ProfileScreen({ navigation }) {
               <Text style={styles.bio}>{profile?.bio || 'Sin biografía'}</Text>
               <View style={styles.actions}>
                 <TouchableOpacity style={styles.btn} onPress={openEdit}>
-                  <Pencil color={COLORS.accent} size={18} />
+                  <Pencil color={colors.accent} size={18} />
                   <Text style={styles.btnText}>Editar perfil</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('Activity')}>
-                  <Activity color={COLORS.accent} size={18} />
+                  <Activity color={colors.accent} size={18} />
                   <Text style={styles.btnText}>Actividad</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('ReaderSettings')}>
-                  <Settings color={COLORS.accent} size={18} />
+                  <Settings color={colors.accent} size={18} />
                   <Text style={styles.btnText}>Ajustes de lectura</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.btn} onPress={handleLogout}>
-                  <LogOut color={COLORS.accent} size={18} />
+                  <LogOut color={colors.accent} size={18} />
                   <Text style={styles.btnText}>Cerrar sesión</Text>
                 </TouchableOpacity>
+              </View>
+              <View style={styles.appearance}>
+                <Text style={styles.appearanceTitle}>Apariencia de la aplicación</Text>
+                <View style={styles.appearanceOptions}>
+                  {APP_THEME_OPTIONS.map((option) => (
+                    <TouchableOpacity
+                      key={option.value}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: themeName === option.value }}
+                      style={[styles.appearanceOption, themeName === option.value && styles.appearanceOptionActive]}
+                      onPress={() => changeTheme(option.value)}
+                      disabled={!isThemeLoaded}
+                    >
+                      <Text style={[styles.appearanceOptionText, themeName === option.value && styles.appearanceOptionTextActive]}>
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
               <Text style={styles.storiesHeading}>Mis historias</Text>
             </View>
@@ -194,20 +229,20 @@ export default function ProfileScreen({ navigation }) {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Editar perfil</Text>
               <TouchableOpacity onPress={() => setEditModal(false)} hitSlop={10}>
-                <X color={COLORS.text} size={22} />
+                <X color={colors.text} size={22} />
               </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.avatarPicker} onPress={pickAvatar} disabled={uploadingAvatar || saving}>
               <Image source={{ uri: avatarUrl || 'https://placehold.co/100x100' }} style={styles.avatarPreview} />
               <View style={styles.cameraBadge}>
-                {uploadingAvatar ? <ActivityIndicator color={COLORS.accent} size="small" /> : <Camera color={COLORS.accent} size={16} />}
+                {uploadingAvatar ? <ActivityIndicator color={colors.accent} size="small" /> : <Camera color={colors.accent} size={16} />}
               </View>
             </TouchableOpacity>
             <Text style={styles.helper}>Toca la foto para cambiarla</Text>
             <TextInput
               style={[styles.input, { height: 100 }]}
               placeholder="Escribe tu biografía..."
-              placeholderTextColor={COLORS.muted}
+              placeholderTextColor={colors.muted}
               value={bio}
               onChangeText={setBio}
               multiline
@@ -217,11 +252,11 @@ export default function ProfileScreen({ navigation }) {
                 <Text style={styles.btnText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.btn, { flex: 1, backgroundColor: COLORS.accentSoft }]}
+                style={[styles.btn, { flex: 1, backgroundColor: colors.accentSoft }]}
                 onPress={saveProfile}
                 disabled={saving || uploadingAvatar}
               >
-                {saving ? <ActivityIndicator color={COLORS.accent} /> : <Text style={styles.btnText}>Guardar</Text>}
+                {saving ? <ActivityIndicator color={colors.accent} /> : <Text style={styles.btnText}>Guardar</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -231,37 +266,44 @@ export default function ProfileScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const createStyles = (colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { height: HEADER_HEIGHT },
-  banner: { height: SCREEN_WIDTH < 600 ? 100 : 130, backgroundColor: COLORS.accentSoft },
-  avatarWrap: { position: 'absolute', bottom: 0, left: PADDING_SM, borderRadius: 60, overflow: 'hidden', borderWidth: 3, borderColor: COLORS.background },
-  avatar: { width: AVATAR_SIZE, height: AVATAR_SIZE, backgroundColor: COLORS.surface },
+  banner: { height: SCREEN_WIDTH < 600 ? 100 : 130, backgroundColor: colors.accentSoft },
+  avatarWrap: { position: 'absolute', bottom: 0, left: PADDING_SM, borderRadius: 60, overflow: 'hidden', borderWidth: 3, borderColor: colors.background },
+  avatar: { width: AVATAR_SIZE, height: AVATAR_SIZE, backgroundColor: colors.surface },
   info: { padding: PADDING_MD },
-  username: { color: COLORS.text, fontSize: SCREEN_WIDTH < 600 ? 18 : 20, fontWeight: 'bold', marginTop: 12 },
-  bio: { color: COLORS.muted, marginTop: 8 },
+  username: { color: colors.text, fontSize: SCREEN_WIDTH < 600 ? 18 : 20, fontWeight: 'bold', marginTop: 12 },
+  bio: { color: colors.muted, marginTop: 8 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 },
-  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.surface, padding: 8, borderRadius: 6 },
-  btnText: { color: COLORS.accent, fontWeight: '600' },
-  storiesHeading: { color: COLORS.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold', marginTop: 20 },
-  storyCard: { flexDirection: 'row', backgroundColor: COLORS.surface, borderRadius: 10, marginHorizontal: PADDING_SM, marginBottom: 12, padding: 10, gap: 10 },
+  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surface, padding: 8, borderRadius: 6 },
+  btnText: { color: colors.accent, fontWeight: '600' },
+  appearance: { marginTop: 20, backgroundColor: colors.surface, borderRadius: 10, padding: 14 },
+  appearanceTitle: { color: colors.text, fontWeight: 'bold', marginBottom: 10 },
+  appearanceOptions: { flexDirection: 'row', gap: 8 },
+  appearanceOption: { flex: 1, alignItems: 'center', backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, paddingVertical: 10, borderRadius: 8 },
+  appearanceOptionActive: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
+  appearanceOptionText: { color: colors.text, fontWeight: '600' },
+  appearanceOptionTextActive: { color: colors.accent },
+  storiesHeading: { color: colors.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold', marginTop: 20 },
+  storyCard: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: 10, marginHorizontal: PADDING_SM, marginBottom: 12, padding: 10, gap: 10 },
   storyCover: { width: SCREEN_WIDTH < 600 ? 50 : 62, height: SCREEN_WIDTH < 600 ? 68 : 86, borderRadius: SCREEN_WIDTH < 600 ? 5 : 6 },
   storyInfo: { flex: 1 },
-  storyTitle: { color: COLORS.text, fontWeight: 'bold', fontSize: SCREEN_WIDTH < 600 ? 14 : 16 },
-  storyStatus: { color: COLORS.muted, marginTop: 4, fontSize: SCREEN_WIDTH < 600 ? 10 : 12 },
+  storyTitle: { color: colors.text, fontWeight: 'bold', fontSize: SCREEN_WIDTH < 600 ? 14 : 16 },
+  storyStatus: { color: colors.muted, marginTop: 4, fontSize: SCREEN_WIDTH < 600 ? 10 : 12 },
   storyActions: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginTop: 8 },
-  storyButton: { backgroundColor: COLORS.accentSoft, paddingHorizontal: SCREEN_WIDTH < 600 ? 8 : 10, paddingVertical: SCREEN_WIDTH < 600 ? 4 : 6, borderRadius: SCREEN_WIDTH < 600 ? 5 : 6 },
-  storyButtonText: { color: COLORS.accent, fontSize: SCREEN_WIDTH < 600 ? 10 : 12, fontWeight: '600' },
-  empty: { textAlign: 'center', color: COLORS.muted, padding: SCREEN_WIDTH < 600 ? 16 : 20 },
+  storyButton: { backgroundColor: colors.accentSoft, paddingHorizontal: SCREEN_WIDTH < 600 ? 8 : 10, paddingVertical: SCREEN_WIDTH < 600 ? 4 : 6, borderRadius: SCREEN_WIDTH < 600 ? 5 : 6 },
+  storyButtonText: { color: colors.accent, fontSize: SCREEN_WIDTH < 600 ? 10 : 12, fontWeight: '600' },
+  empty: { textAlign: 'center', color: colors.muted, padding: SCREEN_WIDTH < 600 ? 16 : 20 },
   listContent: { paddingBottom: 20 },
-  modalWrap: { flex: 1, backgroundColor: COLORS.scrim, justifyContent: 'flex-end', padding: PADDING_SM },
-  modal: { backgroundColor: COLORS.background, borderRadius: 10, padding: PADDING_SM },
+  modalWrap: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'flex-end', padding: PADDING_SM },
+  modal: { backgroundColor: colors.background, borderRadius: 10, padding: PADDING_SM },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  modalTitle: { color: COLORS.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold' },
+  modalTitle: { color: colors.text, fontSize: SCREEN_WIDTH < 600 ? 16 : 18, fontWeight: 'bold' },
   avatarPicker: { alignSelf: 'center', marginBottom: 6 },
-  avatarPreview: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2, backgroundColor: COLORS.surface },
-  cameraBadge: { position: 'absolute', right: 0, bottom: 0, backgroundColor: COLORS.accentSoft, width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  helper: { color: COLORS.muted, textAlign: 'center', fontSize: SCREEN_WIDTH < 600 ? 10 : 12, marginBottom: 10 },
-  input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 6, padding: 10, textAlignVertical: 'top' },
+  avatarPreview: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2, backgroundColor: colors.surface },
+  cameraBadge: { position: 'absolute', right: 0, bottom: 0, backgroundColor: colors.accentSoft, width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  helper: { color: colors.muted, textAlign: 'center', fontSize: SCREEN_WIDTH < 600 ? 10 : 12, marginBottom: 10 },
+  input: { backgroundColor: colors.surface, color: colors.text, borderRadius: 6, padding: 10, textAlignVertical: 'top' },
   modalActions: { flexDirection: 'row', gap: 8, marginTop: 12 },
 });

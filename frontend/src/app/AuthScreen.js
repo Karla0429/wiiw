@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet, Image as RNImage, ScrollView } from 'react-native';
 import { supabase } from '../config/supabase';
+import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 
 export default function AuthScreen({ navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useAppStyles(createStyles);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -87,7 +90,7 @@ export default function AuthScreen({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="Nombre de usuario"
-              placeholderTextColor="#A8927C"
+              placeholderTextColor={colors.muted}
               value={username}
               onChangeText={setUsername}
             />
@@ -95,7 +98,7 @@ export default function AuthScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Email"
-            placeholderTextColor="#A8927C"
+            placeholderTextColor={colors.muted}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -104,14 +107,14 @@ export default function AuthScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
-            placeholderTextColor="#A8927C"
+            placeholderTextColor={colors.muted}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
           <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colors.white} size="small" />
             ) : (
               <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Registrarse'}</Text>
             )}
@@ -132,18 +135,18 @@ export default function AuthScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   scrollView: {
     flex: 1,
-    backgroundColor: '#E8D8C8',
+    backgroundColor: colors.authBackground,
   },
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#E8D8C8',
+    backgroundColor: colors.authBackground,
   },
   screenContainer: {
     flexGrow: 1,
-    backgroundColor: '#E8D8C8',
+    backgroundColor: colors.authBackground,
     width: '100%',
     minHeight: '100%',
     justifyContent: 'center',
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
   },
   topBackground: {
     width: '100%',
-    backgroundColor: '#E8D8C8',
+    backgroundColor: colors.authBackground,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignSelf: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     borderRadius: 28,
     padding: 32,
     paddingTop: 28,
@@ -179,13 +182,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#372410',
+    color: colors.text,
     textAlign: 'left',
     marginBottom: 24,
   },
   input: {
-    backgroundColor: '#F5F0EB',
-    color: '#292521',
+    backgroundColor: colors.inputSurface,
+    color: colors.text,
     borderRadius: 15,
     padding: 14,
     marginBottom: 16,
@@ -193,7 +196,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   button: {
-    backgroundColor: '#372410',
+    backgroundColor: colors.accent,
     borderRadius: 30,
     padding: 14,
     alignItems: 'center',
@@ -201,13 +204,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 16,
     textAlign: 'center',
   },
   switchText: {
-    color: '#A8927C',
+    color: colors.muted,
     textAlign: 'center',
     marginTop: 16,
     fontSize: 14,
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   infoText: {
-    color: '#372410',
+    color: colors.text,
     textAlign: 'center',
     marginTop: 12,
   },

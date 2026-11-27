@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator, Image } from 'react-native';
 import { supabase } from '../config/supabase';
-import { COLORS } from '../config/theme';
+import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import { selectImage, uploadImage } from '../services/imageUpload';
 import BackButton from '../components/BackButton';
 
 export default function StoryFormScreen({ navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useAppStyles(createStyles);
   const storyId = route?.params?.storyId || route?.params?.story_id;
   const template = route?.params?.template;
   const isEditing = !!storyId;
@@ -123,7 +125,7 @@ export default function StoryFormScreen({ navigation, route }) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <BackButton onPress={() => navigation.goBack()} />
-        <ActivityIndicator color={COLORS.accent} style={{ marginTop: 40 }} />
+        <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} />
       </ScrollView>
     );
   }
@@ -132,22 +134,22 @@ export default function StoryFormScreen({ navigation, route }) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <BackButton onPress={() => navigation.goBack()} />
       <Text style={styles.title}>{isEditing ? 'Editar Metadatos' : 'Metadatos de la Historia'}</Text>
-      <TextInput style={styles.input} placeholder="Título" placeholderTextColor={COLORS.muted} value={title} onChangeText={setTitle} />
-      <TextInput style={[styles.input, { height: 80 }]} placeholder="Descripción" placeholderTextColor={COLORS.muted} value={description} onChangeText={setDescription} multiline />
-      <TextInput style={styles.input} placeholder="Género" placeholderTextColor={COLORS.muted} value={genre} onChangeText={setGenre} />
-      <TextInput style={styles.input} placeholder="Idioma" placeholderTextColor={COLORS.muted} value={language} onChangeText={setLanguage} />
-      <TextInput style={styles.input} placeholder="Personajes" placeholderTextColor={COLORS.muted} value={characters} onChangeText={setCharacters} />
-      <TextInput style={styles.input} placeholder="Audiencia Objetiva" placeholderTextColor={COLORS.muted} value={audience} onChangeText={setAudience} />
+      <TextInput style={styles.input} placeholder="Título" placeholderTextColor={colors.muted} value={title} onChangeText={setTitle} />
+      <TextInput style={[styles.input, { height: 80 }]} placeholder="Descripción" placeholderTextColor={colors.muted} value={description} onChangeText={setDescription} multiline />
+      <TextInput style={styles.input} placeholder="Género" placeholderTextColor={colors.muted} value={genre} onChangeText={setGenre} />
+      <TextInput style={styles.input} placeholder="Idioma" placeholderTextColor={colors.muted} value={language} onChangeText={setLanguage} />
+      <TextInput style={styles.input} placeholder="Personajes" placeholderTextColor={colors.muted} value={characters} onChangeText={setCharacters} />
+      <TextInput style={styles.input} placeholder="Audiencia Objetiva" placeholderTextColor={colors.muted} value={audience} onChangeText={setAudience} />
       <TouchableOpacity style={styles.btn} onPress={pickImage} disabled={uploadingCover || loading}>
         {uploadingCover ? (
-          <ActivityIndicator color={COLORS.accent} />
+          <ActivityIndicator color={colors.accent} />
         ) : (
           <Text style={styles.btnText}>{coverUrl ? 'Cambiar Portada' : 'Cargar Portada'}</Text>
         )}
       </TouchableOpacity>
       {coverUrl ? <Image source={{ uri: coverUrl }} style={styles.coverPreview} /> : null}
-      <TouchableOpacity style={[styles.btn, { backgroundColor: COLORS.accent, marginTop: 12 }]} onPress={save} disabled={loading || uploadingCover}>
-        {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={[styles.btnText, { color: COLORS.white }]}>{isEditing ? 'Guardar cambios' : 'Guardar y agregar capítulos'}</Text>}
+      <TouchableOpacity style={[styles.btn, { backgroundColor: colors.accent, marginTop: 12 }]} onPress={save} disabled={loading || uploadingCover}>
+        {loading ? <ActivityIndicator color={colors.white} /> : <Text style={[styles.btnText, { color: colors.white }]}>{isEditing ? 'Guardar cambios' : 'Guardar y agregar capítulos'}</Text>}
       </TouchableOpacity>
       {isEditing || !coverUrl ? null : (
         <TouchableOpacity style={styles.btn} onPress={publishStory} disabled={loading || uploadingCover}>
@@ -158,12 +160,12 @@ export default function StoryFormScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const createStyles = (colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 16 },
-  title: { color: COLORS.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
-  input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 8, padding: 12, marginBottom: 12 },
-  btn: { backgroundColor: COLORS.accentSoft, padding: 12, borderRadius: 8, alignItems: 'center' },
-  btnText: { color: COLORS.accent },
+  title: { color: colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
+  input: { backgroundColor: colors.surface, color: colors.text, borderRadius: 8, padding: 12, marginBottom: 12 },
+  btn: { backgroundColor: colors.accentSoft, padding: 12, borderRadius: 8, alignItems: 'center' },
+  btnText: { color: colors.accent },
   coverPreview: { width: '100%', height: 180, borderRadius: 8, marginTop: 12 },
 });

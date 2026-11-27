@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Plus, Pencil, BookOpen } from 'lucide-react-native';
-import { COLORS } from '../config/theme';
+import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FAB_RIGHT = SCREEN_WIDTH < 600 ? 16 : 20;
@@ -11,6 +11,8 @@ const FAB_SIZE = SCREEN_WIDTH < 600 ? 48 : 56;
 const FAB_SPEED = SCREEN_WIDTH < 600 ? 28 : 28;
 
 export default function CreateScreen({ navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useAppStyles(createStyles);
   const [stories, setStories] = useState([]);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function CreateScreen({ navigation }) {
           <View style={styles.card}>
             <TouchableOpacity style={styles.cardMain} onPress={() => openChapters(item)} activeOpacity={0.8}>
               <View style={styles.cardIcon}>
-                <BookOpen color={COLORS.accent} size={20} />
+                <BookOpen color={colors.accent} size={20} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{item.title || 'Sin título'}</Text>
@@ -54,28 +56,28 @@ export default function CreateScreen({ navigation }) {
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.editBtn} onPress={() => editMetadata(item)} hitSlop={8}>
-              <Pencil color={COLORS.accent} size={18} />
+              <Pencil color={colors.accent} size={18} />
             </TouchableOpacity>
           </View>
         )}
         contentContainerStyle={{ padding: 16 }}
       />
       <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('StoryForm')}>
-        <Plus color={COLORS.white} size={FAB_SPEED} />
+        <Plus color={colors.white} size={FAB_SPEED} />
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const createStyles = (colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: 16, paddingTop: 8 },
-  title: { color: COLORS.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
-  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surface, padding: 16, borderRadius: 8, marginBottom: 12 },
+  title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
+  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, padding: 16, borderRadius: 8, marginBottom: 12 },
   cardMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cardIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.accentSoft, alignItems: 'center', justifyContent: 'center' },
-  cardTitle: { color: COLORS.text, fontSize: 16, fontWeight: 'bold' },
-  cardStatus: { color: COLORS.muted, marginTop: 4 },
+  cardIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  cardTitle: { color: colors.text, fontSize: 16, fontWeight: 'bold' },
+  cardStatus: { color: colors.muted, marginTop: 4 },
   editBtn: { padding: 8, marginLeft: 8 },
-  fab: { position: 'absolute', right: FAB_RIGHT, bottom: FAB_BOTTOM, backgroundColor: COLORS.accent, width: FAB_SIZE, height: FAB_SIZE, borderRadius: FAB_SIZE / 2, alignItems: 'center', justifyContent: 'center' },
+  fab: { position: 'absolute', right: FAB_RIGHT, bottom: FAB_BOTTOM, backgroundColor: colors.accent, width: FAB_SIZE, height: FAB_SIZE, borderRadius: FAB_SIZE / 2, alignItems: 'center', justifyContent: 'center' },
 });

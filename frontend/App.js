@@ -7,8 +7,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Home, Search, PlusSquare, User } from 'lucide-react-native';
 
 import { supabase } from './src/config/supabase';
+import { AppThemeProvider, useAppTheme } from './src/context/AppThemeContext';
 import { ReaderPreferencesProvider } from './src/context/ReaderPreferencesContext';
-import { COLORS } from './src/config/theme';
 import AuthScreen from './src/app/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import SearchScreen from './src/screens/SearchScreen';
@@ -25,10 +25,11 @@ const Stack = createNativeStackNavigator();
 
 function WebTabBar({ state, descriptors, navigation }) {
   const { width } = useWindowDimensions();
+  const { colors } = useAppTheme();
   const compact = width < 600;
 
   return (
-    <View style={styles.webTabBar}>
+    <View style={[styles.webTabBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       <View style={styles.webTabBarBrand}>
         <Image
           source={require('./assets/wiiw-logo.png')}
@@ -44,7 +45,7 @@ function WebTabBar({ state, descriptors, navigation }) {
           const label = typeof options.tabBarLabel === 'string'
             ? options.tabBarLabel
             : options.title || route.name;
-          const color = focused ? COLORS.accent : COLORS.muted;
+          const color = focused ? colors.accent : colors.muted;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -66,7 +67,7 @@ function WebTabBar({ state, descriptors, navigation }) {
               accessibilityState={{ selected: focused }}
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
-              style={[styles.webTabBarButton, focused && styles.webTabBarButtonActive]}
+              style={[styles.webTabBarButton, focused && { backgroundColor: colors.accentSoft }]}
             >
               {options.tabBarIcon?.({ focused, color, size: 20 })}
               {!compact && <Text style={[styles.webTabBarLabel, { color }]}>{label}</Text>}
@@ -80,14 +81,15 @@ function WebTabBar({ state, descriptors, navigation }) {
 
 function MainTabs() {
   const isWeb = Platform.OS === 'web';
+  const { colors } = useAppTheme();
   return (
     <Tab.Navigator
       tabBar={isWeb ? (props) => <WebTabBar {...props} /> : undefined}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: COLORS.background, borderTopColor: COLORS.border },
-        tabBarActiveTintColor: COLORS.accent,
-        tabBarInactiveTintColor: COLORS.muted,
+        tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.muted,
         tabBarPosition: isWeb ? 'top' : 'bottom',
       }}
     >
@@ -106,9 +108,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   webTabBarBrand: {
     width: 180,
@@ -137,9 +137,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 10,
   },
-  webTabBarButtonActive: {
-    backgroundColor: COLORS.accentSoft,
-  },
   webTabBarLabel: {
     fontSize: 14,
     fontWeight: '600',
@@ -151,7 +148,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function App() {
+function AppContent() {
+  const { colors, themeName } = useAppTheme();
   const [initialRouteName, setInitialRouteName] = useState(null);
 
   useEffect(() => {
@@ -176,28 +174,34 @@ export default function App() {
 
   if (!initialRouteName) {
     return (
-      <ReaderPreferencesProvider>
-        <View style={[styles.sessionLoading, { backgroundColor: COLORS.background }]}>
-          <ActivityIndicator color={COLORS.accent} />
-        </View>
-      </ReaderPreferencesProvider>
+      <View style={[styles.sessionLoading, { backgroundColor: colors.background }]}>
+        <ActivityIndicator color={colors.accent} />
+      </View>
     );
   }
 
   return (
-    <ReaderPreferencesProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: COLORS.background } }}>
-          <Stack.Screen name="Auth" component={AuthScreen} />
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="Activity" component={ActivityScreen} />
-          <Stack.Screen name="StoryForm" component={StoryFormScreen} />
-          <Stack.Screen name="ChapterEdit" component={ChapterEditScreen} />
-          <Stack.Screen name="ReadStory" component={ReadStoryScreen} />
-          <Stack.Screen name="ReaderSettings" component={ReaderSettingsScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </ReaderPreferencesProvider>
+    <NavigationContainer>
+      <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
+      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+        <Stack.Screen name="Auth" component={AuthScreen} />
+        <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="Activity" component={ActivityScreen} />
+        <Stack.Screen name="StoryForm" component={StoryFormScreen} />
+        <Stack.Screen name="ChapterEdit" component={ChapterEditScreen} />
+        <Stack.Screen name="ReadStory" component={ReadStoryScreen} />
+        <Stack.Screen name="ReaderSettings" component={ReaderSettingsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AppThemeProvider>
+      <ReaderPreferencesProvider>
+        <AppContent />
+      </ReaderPreferencesProvider>
+    </AppThemeProvider>
   );
 }

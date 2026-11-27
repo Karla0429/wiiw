@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { supabase } from '../config/supabase';
-import { COLORS } from '../config/theme';
+import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import BackButton from '../components/BackButton';
 
 export default function ChapterEditScreen({ navigation, route }) {
+  const { colors } = useAppTheme();
+  const styles = useAppStyles(createStyles);
   const storyId = route?.params?.storyId || route?.params?.story_id;
   const [chapterNumber, setChapterNumber] = useState('1');
   const [title, setTitle] = useState('');
@@ -112,33 +114,33 @@ export default function ChapterEditScreen({ navigation, route }) {
         <Text style={styles.newChapterText}>+ Agregar capítulo</Text>
       </TouchableOpacity>
 
-      <TextInput style={styles.input} placeholder="N° Capítulo" placeholderTextColor={COLORS.muted} value={chapterNumber} onChangeText={setChapterNumber} keyboardType="numeric" />
-      <TextInput style={styles.input} placeholder="Título del capítulo" placeholderTextColor={COLORS.muted} value={title} onChangeText={setTitle} />
-      <TextInput style={[styles.input, { minHeight: 220, textAlignVertical: 'top' }]} placeholder="Contenido..." placeholderTextColor={COLORS.muted} value={content} onChangeText={setContent} multiline />
+      <TextInput style={styles.input} placeholder="N° Capítulo" placeholderTextColor={colors.muted} value={chapterNumber} onChangeText={setChapterNumber} keyboardType="numeric" />
+      <TextInput style={styles.input} placeholder="Título del capítulo" placeholderTextColor={colors.muted} value={title} onChangeText={setTitle} />
+      <TextInput style={[styles.input, { minHeight: 220, textAlignVertical: 'top' }]} placeholder="Contenido..." placeholderTextColor={colors.muted} value={content} onChangeText={setContent} multiline />
       <View style={styles.row}>
         <Text style={styles.label}>Permitir comentarios</Text>
-        <Switch value={allowComments} onValueChange={setAllowComments} thumbColor={COLORS.white} trackColor={{ false: COLORS.border, true: COLORS.accent }} />
+        <Switch value={allowComments} onValueChange={setAllowComments} thumbColor={colors.white} trackColor={{ false: colors.border, true: colors.accent }} />
       </View>
       <TouchableOpacity style={styles.btn} onPress={save} disabled={loading}>
-        {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.btnText}>{editingId ? 'Guardar cambios' : 'Guardar capítulo'}</Text>}
+        {loading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.btnText}>{editingId ? 'Guardar cambios' : 'Guardar capítulo'}</Text>}
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  title: { color: COLORS.text, fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
+const createStyles = (colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  title: { color: colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
   chaptersList: { gap: 8, marginBottom: 12 },
-  chapterItem: { backgroundColor: COLORS.surface, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: COLORS.border },
-  chapterItemActive: { borderColor: COLORS.accent },
-  chapterTitle: { color: COLORS.accent, fontWeight: 'bold' },
-  chapterSubtitle: { color: COLORS.text, marginTop: 3 },
-  newChapterButton: { backgroundColor: COLORS.accentSoft, padding: 10, borderRadius: 8, alignItems: 'center', marginBottom: 12 },
-  newChapterText: { color: COLORS.accent, fontWeight: '600' },
-  input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 8, padding: 12, marginBottom: 10 },
+  chapterItem: { backgroundColor: colors.surface, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.border },
+  chapterItemActive: { borderColor: colors.accent },
+  chapterTitle: { color: colors.accent, fontWeight: 'bold' },
+  chapterSubtitle: { color: colors.text, marginTop: 3 },
+  newChapterButton: { backgroundColor: colors.accentSoft, padding: 10, borderRadius: 8, alignItems: 'center', marginBottom: 12 },
+  newChapterText: { color: colors.accent, fontWeight: '600' },
+  input: { backgroundColor: colors.surface, color: colors.text, borderRadius: 8, padding: 12, marginBottom: 10 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  label: { color: COLORS.text },
-  btn: { backgroundColor: COLORS.accent, padding: 12, borderRadius: 8, alignItems: 'center' },
-  btnText: { color: COLORS.white, fontWeight: 'bold' },
+  label: { color: colors.text },
+  btn: { backgroundColor: colors.accent, padding: 12, borderRadius: 8, alignItems: 'center' },
+  btnText: { color: colors.white, fontWeight: 'bold' },
 });

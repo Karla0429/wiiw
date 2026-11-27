@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Search, BookOpen, Copy } from 'lucide-react-native';
-import { COLORS } from '../config/theme';
+import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 
 export default function SearchScreen({ navigation }) {
+  const { colors } = useAppTheme();
+  const styles = useAppStyles(createStyles);
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState(null);
   const [results, setResults] = useState([]);
@@ -66,8 +68,8 @@ export default function SearchScreen({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>Explorar</Text>
       <View style={styles.searchBox}>
-        <Search color={COLORS.muted} size={18} />
-        <TextInput style={styles.input} placeholder="Buscar por título..." placeholderTextColor={COLORS.muted} value={query} onChangeText={onChangeQuery} />
+        <Search color={colors.muted} size={18} />
+        <TextInput style={styles.input} placeholder="Buscar por título..." placeholderTextColor={colors.muted} value={query} onChangeText={onChangeQuery} />
       </View>
       <Text style={styles.section}>Categorías</Text>
       <View style={styles.chips}>
@@ -83,7 +85,7 @@ export default function SearchScreen({ navigation }) {
       </View>
       <Text style={styles.section}>{sectionTitle}</Text>
       {loading ? (
-        <ActivityIndicator color={COLORS.accent} style={{ marginTop: 24 }} />
+        <ActivityIndicator color={colors.accent} style={{ marginTop: 24 }} />
       ) : (
         <FlatList
           data={results}
@@ -96,11 +98,11 @@ export default function SearchScreen({ navigation }) {
               {item.status !== 'published' ? <Text style={styles.cardStatus}>Tu borrador</Text> : null}
               <View style={styles.cardActions}>
                 <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate(item.status === 'published' ? 'ReadStory' : 'ChapterEdit', { storyId: item.id })}>
-                  <BookOpen color={COLORS.accent} size={16} />
+                  <BookOpen color={colors.accent} size={16} />
                   <Text style={styles.actionText}>{item.status === 'published' ? 'Leer' : 'Capítulos'}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('StoryForm', { template: item })}>
-                  <Copy color={COLORS.accent} size={16} />
+                  <Copy color={colors.accent} size={16} />
                   <Text style={styles.actionText}>Recrear</Text>
                 </TouchableOpacity>
               </View>
@@ -114,23 +116,23 @@ export default function SearchScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  title: { color: COLORS.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
-  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surface, marginHorizontal: 16, borderRadius: 8, paddingHorizontal: 10, gap: 8 },
-  input: { flex: 1, color: COLORS.text, padding: 10 },
-  section: { color: COLORS.text, fontSize: 16, fontWeight: 'bold', paddingHorizontal: 16, marginTop: 16 },
+const createStyles = (colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, marginHorizontal: 16, borderRadius: 8, paddingHorizontal: 10, gap: 8 },
+  input: { flex: 1, color: colors.text, padding: 10 },
+  section: { color: colors.text, fontSize: 16, fontWeight: 'bold', paddingHorizontal: 16, marginTop: 16 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginTop: 8 },
-  chip: { backgroundColor: COLORS.surface, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
-  chipActive: { backgroundColor: COLORS.accentSoft },
-  chipText: { color: COLORS.text },
-  card: { backgroundColor: COLORS.surface, padding: 14, borderRadius: 8, marginBottom: 10 },
-  cardTitle: { color: COLORS.text, fontWeight: 'bold' },
-  cardSub: { color: COLORS.accent, marginTop: 4 },
-  cardDescription: { color: COLORS.text, marginTop: 6, fontSize: 12 },
-  cardStatus: { color: COLORS.muted, fontSize: 12, marginTop: 6 },
+  chip: { backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+  chipActive: { backgroundColor: colors.accentSoft },
+  chipText: { color: colors.text },
+  card: { backgroundColor: colors.surface, padding: 14, borderRadius: 8, marginBottom: 10 },
+  cardTitle: { color: colors.text, fontWeight: 'bold' },
+  cardSub: { color: colors.accent, marginTop: 4 },
+  cardDescription: { color: colors.text, marginTop: 6, fontSize: 12 },
+  cardStatus: { color: colors.muted, fontSize: 12, marginTop: 6 },
   cardActions: { flexDirection: 'row', gap: 12, marginTop: 12 },
   actionButton: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 4 },
-  actionText: { color: COLORS.accent, fontWeight: '600', fontSize: 12 },
-  empty: { color: COLORS.muted, textAlign: 'center', marginTop: 20 },
+  actionText: { color: colors.accent, fontWeight: '600', fontSize: 12 },
+  empty: { color: colors.muted, textAlign: 'center', marginTop: 20 },
 });

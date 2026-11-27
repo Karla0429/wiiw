@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { supabase } from '../config/supabase';
-import { COLORS } from '../config/theme';
+import { useAppStyles } from '../context/AppThemeContext';
 import BackButton from '../components/BackButton';
 
 export default function ActivityScreen({ navigation }) {
+  const styles = useAppStyles(createStyles);
   const [tab, setTab] = useState('saved');
   const [data, setData] = useState([]);
   const [likesCount, setLikesCount] = useState(null);
@@ -87,16 +88,16 @@ export default function ActivityScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const createStyles = (colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: 16, paddingTop: 8 },
-  title: { color: COLORS.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
+  title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   tabs: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', paddingHorizontal: 16, gap: 8 },
-  tab: { backgroundColor: COLORS.surface, paddingVertical: 10, paddingHorizontal: 16, alignItems: 'center', borderRadius: 8 },
-  tabActive: { backgroundColor: COLORS.accentSoft },
-  tabText: { color: COLORS.text },
-  item: { backgroundColor: COLORS.surface, padding: 14, borderRadius: 8, marginBottom: 10 },
-  itemText: { color: COLORS.text },
+  tab: { backgroundColor: colors.surface, paddingVertical: 10, paddingHorizontal: 16, alignItems: 'center', borderRadius: 8 },
+  tabActive: { backgroundColor: colors.accentSoft },
+  tabText: { color: colors.text },
+  item: { backgroundColor: colors.surface, padding: 14, borderRadius: 8, marginBottom: 10 },
+  itemText: { color: colors.text },
   likesSummary: { margin: 16, alignItems: 'center', paddingVertical: 24 },
-  likesCount: { color: COLORS.text, fontSize: 40, fontWeight: 'bold' },
+  likesCount: { color: colors.text, fontSize: 40, fontWeight: 'bold' },
 });

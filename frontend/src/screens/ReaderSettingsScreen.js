@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { READER_THEMES } from '../config/theme';
+import { useAppTheme } from '../context/AppThemeContext';
 import { useReaderPreferences } from '../context/ReaderPreferencesContext';
 
 const FONTS = [
@@ -12,6 +13,7 @@ const FONTS = [
 const FONT_SIZES = [16, 18, 20, 22, 24];
 
 export default function ReaderSettingsScreen({ navigation }) {
+  const { colors } = useAppTheme();
   const { preferences, updatePreferences, loadError } = useReaderPreferences();
   const theme = READER_THEMES[preferences.theme] || READER_THEMES.paper;
 
@@ -28,41 +30,41 @@ export default function ReaderSettingsScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <ArrowLeft color={theme.accent} size={20} />
-        <Text style={{ color: theme.accent, fontWeight: '600' }}>Volver</Text>
+        <ArrowLeft color={colors.accent} size={20} />
+        <Text style={{ color: colors.accent, fontWeight: '600' }}>Volver</Text>
       </TouchableOpacity>
-      <Text style={[styles.title, { color: theme.text }]}>Ajustes de lectura</Text>
-      <Text style={[styles.description, { color: theme.muted }]}>Personaliza la lectura. Los cambios se guardan automáticamente.</Text>
+      <Text style={[styles.title, { color: colors.text }]}>Ajustes de lectura</Text>
+      <Text style={[styles.description, { color: colors.muted }]}>Personaliza la lectura. Los cambios se guardan automáticamente.</Text>
 
-      <Text style={[styles.label, { color: theme.text }]}>Fuente</Text>
+      <Text style={[styles.label, { color: colors.text }]}>Fuente</Text>
       <View style={styles.options}>
         {FONTS.map((font) => (
           <TouchableOpacity
             key={font.value}
-            style={[styles.option, { backgroundColor: theme.surface, borderColor: theme.border }, preferences.fontFamily === font.value && { borderColor: theme.accent }]}
+            style={[styles.option, { backgroundColor: colors.surface, borderColor: colors.border }, preferences.fontFamily === font.value && { borderColor: colors.accent }]}
             onPress={() => update({ fontFamily: font.value })}
           >
-            <Text style={[styles.optionText, { color: theme.text, fontFamily: font.value }]}>{font.label}</Text>
+            <Text style={[styles.optionText, { color: colors.text, fontFamily: font.value }]}>{font.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <Text style={[styles.label, { color: theme.text }]}>Tamaño del texto</Text>
+      <Text style={[styles.label, { color: colors.text }]}>Tamaño del texto</Text>
       <View style={styles.options}>
         {FONT_SIZES.map((fontSize) => (
           <TouchableOpacity
             key={fontSize}
-            style={[styles.sizeOption, { backgroundColor: theme.surface, borderColor: theme.border }, preferences.fontSize === fontSize && { borderColor: theme.accent }]}
+            style={[styles.sizeOption, { backgroundColor: colors.surface, borderColor: colors.border }, preferences.fontSize === fontSize && { borderColor: colors.accent }]}
             onPress={() => update({ fontSize })}
           >
-            <Text style={[styles.optionText, { color: theme.text, fontSize }]}>{fontSize}</Text>
+            <Text style={[styles.optionText, { color: colors.text, fontSize }]}>{fontSize}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <Text style={[styles.label, { color: theme.text }]}>Tema</Text>
+      <Text style={[styles.label, { color: colors.text }]}>Tema de lectura</Text>
       <View style={styles.options}>
         {Object.entries(READER_THEMES).map(([key, option]) => (
           <TouchableOpacity
