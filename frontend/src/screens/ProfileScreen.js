@@ -4,7 +4,6 @@ import { supabase } from '../config/supabase';
 import { LogOut, Activity, Pencil, Camera, X, Settings } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
 import { selectImage, uploadImage } from '../services/imageUpload';
-import BackButton from '../components/BackButton';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const AVATAR_SIZE = SCREEN_WIDTH < 600 ? 80 : 90;
@@ -128,9 +127,6 @@ export default function ProfileScreen({ navigation }) {
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={
           <>
-            <View style={styles.backButtonWrap}>
-              <BackButton onPress={() => navigation.navigate('Inicio')} />
-            </View>
             <View style={styles.header}>
               <View style={styles.banner} />
               <View style={styles.avatarWrap}>
@@ -237,7 +233,6 @@ export default function ProfileScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  backButtonWrap: { paddingHorizontal: PADDING_SM, paddingTop: 8 },
   header: { height: HEADER_HEIGHT },
   banner: { height: SCREEN_WIDTH < 600 ? 100 : 130, backgroundColor: COLORS.accentSoft },
   avatarWrap: { position: 'absolute', bottom: 0, left: PADDING_SM, borderRadius: 60, overflow: 'hidden', borderWidth: 3, borderColor: COLORS.background },

@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from '
 import { supabase } from '../config/supabase';
 import { Plus, Pencil, BookOpen } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
-import BackButton from '../components/BackButton';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FAB_RIGHT = SCREEN_WIDTH < 600 ? 16 : 20;
@@ -38,7 +37,6 @@ export default function CreateScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <BackButton onPress={() => navigation.navigate('Inicio')} />
         <Text style={styles.title}>Taller de Escritura</Text>
       </View>
       <FlatList
