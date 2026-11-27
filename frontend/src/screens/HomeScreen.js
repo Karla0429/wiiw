@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Share, Image, Modal, ScrollView, ActivityIndicator, Alert, Platform, useWindowDimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Heart, MessageCircle, Share2, Eye, X, BookOpen } from 'lucide-react-native';
+import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 
 const IS_WEB = Platform.OS === 'web';
@@ -406,7 +407,7 @@ export default function HomeScreen({ navigation }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(1280) },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 },
   header: { color: colors.text, fontSize: 28, fontWeight: 'bold', padding: 16 },
   card: { flex: 1, aspectRatio: 1, backgroundColor: colors.surface, borderRadius: 12, overflow: 'hidden' },

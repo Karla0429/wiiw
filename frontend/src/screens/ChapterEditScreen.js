@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { supabase } from '../config/supabase';
+import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import BackButton from '../components/BackButton';
 
@@ -129,7 +130,7 @@ export default function ChapterEditScreen({ navigation, route }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(900) },
   title: { color: colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
   chaptersList: { gap: 8, marginBottom: 12 },
   chapterItem: { backgroundColor: colors.surface, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.border },

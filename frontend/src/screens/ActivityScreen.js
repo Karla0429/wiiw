@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { supabase } from '../config/supabase';
+import { centeredWebContent } from '../config/layout';
 import { useAppStyles } from '../context/AppThemeContext';
 import BackButton from '../components/BackButton';
 
@@ -89,7 +90,7 @@ export default function ActivityScreen({ navigation }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(960) },
   header: { paddingHorizontal: 16, paddingTop: 8 },
   title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   tabs: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', paddingHorizontal: 16, gap: 8 },

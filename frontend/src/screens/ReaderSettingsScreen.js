@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
+import { centeredWebContent } from '../config/layout';
 import { READER_THEMES } from '../config/theme';
 import { useAppTheme } from '../context/AppThemeContext';
 import { useReaderPreferences } from '../context/ReaderPreferencesContext';
@@ -88,7 +89,7 @@ export default function ReaderSettingsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, ...centeredWebContent(840) },
   content: { padding: 20, paddingBottom: 36 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 18 },
   title: { fontSize: 24, fontWeight: 'bold' },

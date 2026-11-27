@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInpu
 import { supabase } from '../config/supabase';
 import { LogOut, Activity, Pencil, Camera, X, Settings } from 'lucide-react-native';
 import { APP_THEME_OPTIONS } from '../config/theme';
+import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import { selectImage, uploadImage } from '../services/imageUpload';
 
@@ -268,7 +269,7 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(1040) },
   header: { height: HEADER_HEIGHT, width: IS_WEB ? '100%' : undefined },
   banner: { height: SCREEN_WIDTH < 600 ? 100 : 130, backgroundColor: colors.accentSoft },
   avatarWrap: {
@@ -300,7 +301,8 @@ const createStyles = (colors) => StyleSheet.create({
   appearanceTitle: { color: colors.text, fontWeight: 'bold', marginBottom: 10, textAlign: IS_WEB ? 'center' : undefined },
   appearanceOptions: { flexDirection: 'row', justifyContent: IS_WEB ? 'center' : undefined, gap: 8 },
   appearanceOption: {
-    flex: IS_WEB ? 0 : 1,
+    flex: IS_WEB ? undefined : 1,
+    flexShrink: IS_WEB ? 0 : undefined,
     width: IS_WEB ? 140 : undefined,
     alignItems: 'center',
     backgroundColor: colors.background,
@@ -334,9 +336,6 @@ const createStyles = (colors) => StyleSheet.create({
   storyButtonText: { color: colors.accent, fontSize: SCREEN_WIDTH < 600 ? 10 : 12, fontWeight: '600' },
   empty: { textAlign: 'center', color: colors.muted, padding: SCREEN_WIDTH < 600 ? 16 : 20 },
   listContent: {
-    width: IS_WEB ? '100%' : undefined,
-    maxWidth: IS_WEB ? 1040 : undefined,
-    alignSelf: IS_WEB ? 'center' : undefined,
     paddingHorizontal: IS_WEB ? 24 : 0,
     paddingBottom: 20,
   },

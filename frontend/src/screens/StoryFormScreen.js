@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator, Image } from 'react-native';
 import { supabase } from '../config/supabase';
+import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import { selectImage, uploadImage } from '../services/imageUpload';
 import BackButton from '../components/BackButton';
@@ -161,7 +162,7 @@ export default function StoryFormScreen({ navigation, route }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(840) },
   content: { padding: 16 },
   title: { color: colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
   input: { backgroundColor: colors.surface, color: colors.text, borderRadius: 8, padding: 12, marginBottom: 12 },

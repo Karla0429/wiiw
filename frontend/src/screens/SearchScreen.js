@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Search, BookOpen, Copy } from 'lucide-react-native';
+import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 
 export default function SearchScreen({ navigation }) {
@@ -117,7 +118,7 @@ export default function SearchScreen({ navigation }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(1050) },
   title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, marginHorizontal: 16, borderRadius: 8, paddingHorizontal: 10, gap: 8 },
   input: { flex: 1, color: colors.text, padding: 10 },

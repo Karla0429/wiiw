@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import { supabase } from '../config/supabase';
 import { Plus, Pencil, BookOpen } from 'lucide-react-native';
+import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -70,7 +71,7 @@ export default function CreateScreen({ navigation }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(1000) },
   header: { paddingHorizontal: 16, paddingTop: 8 },
   title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, padding: 16, borderRadius: 8, marginBottom: 12 },
