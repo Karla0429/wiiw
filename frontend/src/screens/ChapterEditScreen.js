@@ -93,7 +93,7 @@ export default function ChapterEditScreen({ navigation, route }) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, flexGrow: 1 }}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <BackButton onPress={() => navigation.goBack()} />
       <Text style={styles.title}>Editor de Capítulos</Text>
 
@@ -130,7 +130,8 @@ export default function ChapterEditScreen({ navigation, route }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(900) },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { padding: 16, flexGrow: 1, ...centeredWebContent(900) },
   title: { color: colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
   chaptersList: { gap: 8, marginBottom: 12 },
   chapterItem: { backgroundColor: colors.surface, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.border },

@@ -67,58 +67,61 @@ export default function SearchScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Explorar</Text>
-      <View style={styles.searchBox}>
-        <Search color={colors.muted} size={18} />
-        <TextInput style={styles.input} placeholder="Buscar por título..." placeholderTextColor={colors.muted} value={query} onChangeText={onChangeQuery} />
-      </View>
-      <Text style={styles.section}>Categorías</Text>
-      <View style={styles.chips}>
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category}
-            style={[styles.chip, activeCategory === category && styles.chipActive]}
-            onPress={() => filterByCategory(category)}
-          >
-            <Text style={styles.chipText}>{category}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <Text style={styles.section}>{sectionTitle}</Text>
-      {loading ? (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: 24 }} />
-      ) : (
-        <FlatList
-          data={results}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>{item.title || 'Sin título'}</Text>
-              <Text style={styles.cardSub}>{item.genre}</Text>
-              {item.description ? <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text> : null}
-              {item.status !== 'published' ? <Text style={styles.cardStatus}>Tu borrador</Text> : null}
-              <View style={styles.cardActions}>
-                <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate(item.status === 'published' ? 'ReadStory' : 'ChapterEdit', { storyId: item.id })}>
-                  <BookOpen color={colors.accent} size={16} />
-                  <Text style={styles.actionText}>{item.status === 'published' ? 'Leer' : 'Capítulos'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('StoryForm', { template: item })}>
-                  <Copy color={colors.accent} size={16} />
-                  <Text style={styles.actionText}>Recrear</Text>
-                </TouchableOpacity>
+      <View style={styles.content}>
+        <Text style={styles.title}>Explorar</Text>
+        <View style={styles.searchBox}>
+          <Search color={colors.muted} size={18} />
+          <TextInput style={styles.input} placeholder="Buscar por título..." placeholderTextColor={colors.muted} value={query} onChangeText={onChangeQuery} />
+        </View>
+        <Text style={styles.section}>Categorías</Text>
+        <View style={styles.chips}>
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category}
+              style={[styles.chip, activeCategory === category && styles.chipActive]}
+              onPress={() => filterByCategory(category)}
+            >
+              <Text style={styles.chipText}>{category}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text style={styles.section}>{sectionTitle}</Text>
+        {loading ? (
+          <ActivityIndicator color={colors.accent} style={{ marginTop: 24 }} />
+        ) : (
+          <FlatList
+            data={results}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>{item.title || 'Sin título'}</Text>
+                <Text style={styles.cardSub}>{item.genre}</Text>
+                {item.description ? <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text> : null}
+                {item.status !== 'published' ? <Text style={styles.cardStatus}>Tu borrador</Text> : null}
+                <View style={styles.cardActions}>
+                  <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate(item.status === 'published' ? 'ReadStory' : 'ChapterEdit', { storyId: item.id })}>
+                    <BookOpen color={colors.accent} size={16} />
+                    <Text style={styles.actionText}>{item.status === 'published' ? 'Leer' : 'Capítulos'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('StoryForm', { template: item })}>
+                    <Copy color={colors.accent} size={16} />
+                    <Text style={styles.actionText}>Recrear</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          )}
-          ListEmptyComponent={<Text style={styles.empty}>No se encontraron historias.</Text>}
-          contentContainerStyle={{ padding: 16 }}
-        />
-      )}
+            )}
+            ListEmptyComponent={<Text style={styles.empty}>No se encontraron historias.</Text>}
+            contentContainerStyle={{ padding: 16 }}
+          />
+        )}
+      </View>
     </View>
   );
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(1050) },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { flex: 1, ...centeredWebContent(1050) },
   title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, marginHorizontal: 16, borderRadius: 8, paddingHorizontal: 10, gap: 8 },
   input: { flex: 1, color: colors.text, padding: 10 },

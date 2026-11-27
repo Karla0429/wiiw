@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInpu
 import { supabase } from '../config/supabase';
 import { LogOut, Activity, Pencil, Camera, X, Settings } from 'lucide-react-native';
 import { APP_THEME_OPTIONS } from '../config/theme';
-import { centeredWebContent } from '../config/layout';
 import { useAppStyles, useAppTheme } from '../context/AppThemeContext';
 import { selectImage, uploadImage } from '../services/imageUpload';
 
@@ -269,7 +268,7 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(1040) },
+  container: { flex: 1, backgroundColor: colors.background },
   header: { height: HEADER_HEIGHT, width: IS_WEB ? '100%' : undefined },
   banner: { height: SCREEN_WIDTH < 600 ? 100 : 130, backgroundColor: colors.accentSoft },
   avatarWrap: {

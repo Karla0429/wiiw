@@ -39,30 +39,32 @@ export default function CreateScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Taller de Escritura</Text>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Taller de Escritura</Text>
+        </View>
+        <FlatList
+          data={stories}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <TouchableOpacity style={styles.cardMain} onPress={() => openChapters(item)} activeOpacity={0.8}>
+                <View style={styles.cardIcon}>
+                  <BookOpen color={colors.accent} size={20} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.cardTitle}>{item.title || 'Sin título'}</Text>
+                  <Text style={styles.cardStatus}>{item.status}</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.editBtn} onPress={() => editMetadata(item)} hitSlop={8}>
+                <Pencil color={colors.accent} size={18} />
+              </TouchableOpacity>
+            </View>
+          )}
+          contentContainerStyle={{ padding: 16 }}
+        />
       </View>
-      <FlatList
-        data={stories}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.cardMain} onPress={() => openChapters(item)} activeOpacity={0.8}>
-              <View style={styles.cardIcon}>
-                <BookOpen color={colors.accent} size={20} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>{item.title || 'Sin título'}</Text>
-                <Text style={styles.cardStatus}>{item.status}</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.editBtn} onPress={() => editMetadata(item)} hitSlop={8}>
-              <Pencil color={colors.accent} size={18} />
-            </TouchableOpacity>
-          </View>
-        )}
-        contentContainerStyle={{ padding: 16 }}
-      />
       <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('StoryForm')}>
         <Plus color={colors.white} size={FAB_SPEED} />
       </TouchableOpacity>
@@ -71,7 +73,8 @@ export default function CreateScreen({ navigation }) {
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, ...centeredWebContent(1000) },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { flex: 1, ...centeredWebContent(1000) },
   header: { paddingHorizontal: 16, paddingTop: 8 },
   title: { color: colors.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, padding: 16, borderRadius: 8, marginBottom: 12 },

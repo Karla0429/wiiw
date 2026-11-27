@@ -89,8 +89,8 @@ export default function ReaderSettingsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, ...centeredWebContent(840) },
-  content: { padding: 20, paddingBottom: 36 },
+  container: { flex: 1 },
+  content: { padding: 20, paddingBottom: 36, ...centeredWebContent(840) },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 18 },
   title: { fontSize: 24, fontWeight: 'bold' },
   description: { marginTop: 8, lineHeight: 20 },
