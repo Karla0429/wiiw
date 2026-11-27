@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Activity
 import { supabase } from '../config/supabase';
 import { Search, BookOpen, Copy } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
+import BackButton from '../components/BackButton';
 
 export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
@@ -64,6 +65,9 @@ export default function SearchScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.backButtonWrap}>
+        <BackButton onPress={() => navigation.navigate('Inicio')} />
+      </View>
       <Text style={styles.title}>Explorar</Text>
       <View style={styles.searchBox}>
         <Search color={COLORS.muted} size={18} />
@@ -117,6 +121,7 @@ export default function SearchScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   title: { color: COLORS.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
+  backButtonWrap: { paddingHorizontal: 16, paddingTop: 8 },
   searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surface, marginHorizontal: 16, borderRadius: 8, paddingHorizontal: 10, gap: 8 },
   input: { flex: 1, color: COLORS.text, padding: 10 },
   section: { color: COLORS.text, fontSize: 16, fontWeight: 'bold', paddingHorizontal: 16, marginTop: 16 },

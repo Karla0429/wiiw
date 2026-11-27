@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { supabase } from '../config/supabase';
 import { COLORS } from '../config/theme';
+import BackButton from '../components/BackButton';
 
-export default function ActivityScreen() {
+export default function ActivityScreen({ navigation }) {
   const [tab, setTab] = useState('saved');
   const [data, setData] = useState([]);
   const [user, setUser] = useState(null);
@@ -36,6 +37,9 @@ export default function ActivityScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <BackButton onPress={() => navigation.goBack()} />
+      </View>
       <Text style={styles.title}>Actividad</Text>
       <View style={styles.tabs}>
         <TouchableOpacity style={[styles.tab, tab === 'saved' && styles.tabActive]} onPress={() => setTab('saved')}><Text style={styles.tabText}>Guardados</Text></TouchableOpacity>
@@ -58,6 +62,7 @@ export default function ActivityScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  header: { paddingHorizontal: 16, paddingTop: 8 },
   title: { color: COLORS.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   tabs: { flexDirection: 'row', paddingHorizontal: 16, gap: 8 },
   tab: { flex: 1, backgroundColor: COLORS.surface, padding: 10, alignItems: 'center', borderRadius: 8 },

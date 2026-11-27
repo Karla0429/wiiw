@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from '
 import { supabase } from '../config/supabase';
 import { Plus, Pencil, BookOpen } from 'lucide-react-native';
 import { COLORS } from '../config/theme';
+import BackButton from '../components/BackButton';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FAB_RIGHT = SCREEN_WIDTH < 600 ? 16 : 20;
@@ -36,7 +37,10 @@ export default function CreateScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Taller de Escritura</Text>
+      <View style={styles.header}>
+        <BackButton onPress={() => navigation.navigate('Inicio')} />
+        <Text style={styles.title}>Taller de Escritura</Text>
+      </View>
       <FlatList
         data={stories}
         keyExtractor={(item) => item.id.toString()}
@@ -67,6 +71,7 @@ export default function CreateScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  header: { paddingHorizontal: 16, paddingTop: 8 },
   title: { color: COLORS.text, fontSize: 24, fontWeight: 'bold', padding: 16 },
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surface, padding: 16, borderRadius: 8, marginBottom: 12 },
   cardMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },

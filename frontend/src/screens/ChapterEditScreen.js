@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { supabase } from '../config/supabase';
 import { COLORS } from '../config/theme';
+import BackButton from '../components/BackButton';
 
-export default function ChapterEditScreen({ route }) {
+export default function ChapterEditScreen({ navigation, route }) {
   const storyId = route?.params?.storyId || route?.params?.story_id;
   const [chapterNumber, setChapterNumber] = useState('1');
   const [title, setTitle] = useState('');
@@ -90,6 +91,7 @@ export default function ChapterEditScreen({ route }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, flexGrow: 1 }}>
+      <BackButton onPress={() => navigation.goBack()} />
       <Text style={styles.title}>Editor de Capítulos</Text>
 
       {chapters.length ? (

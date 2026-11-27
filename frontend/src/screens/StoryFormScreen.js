@@ -3,6 +3,7 @@ import { Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Activ
 import { supabase } from '../config/supabase';
 import { COLORS } from '../config/theme';
 import { selectImage, uploadImage } from '../services/imageUpload';
+import BackButton from '../components/BackButton';
 
 export default function StoryFormScreen({ navigation, route }) {
   const storyId = route?.params?.storyId || route?.params?.story_id;
@@ -120,14 +121,16 @@ export default function StoryFormScreen({ navigation, route }) {
 
   if (fetching) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <BackButton onPress={() => navigation.goBack()} />
         <ActivityIndicator color={COLORS.accent} style={{ marginTop: 40 }} />
       </ScrollView>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <BackButton onPress={() => navigation.goBack()} />
       <Text style={styles.title}>{isEditing ? 'Editar Metadatos' : 'Metadatos de la Historia'}</Text>
       <TextInput style={styles.input} placeholder="Título" placeholderTextColor={COLORS.muted} value={title} onChangeText={setTitle} />
       <TextInput style={[styles.input, { height: 80 }]} placeholder="Descripción" placeholderTextColor={COLORS.muted} value={description} onChangeText={setDescription} multiline />
@@ -157,6 +160,7 @@ export default function StoryFormScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  content: { padding: 16 },
   title: { color: COLORS.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
   input: { backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: 8, padding: 12, marginBottom: 12 },
   btn: { backgroundColor: COLORS.accentSoft, padding: 12, borderRadius: 8, alignItems: 'center' },
