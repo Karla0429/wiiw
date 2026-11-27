@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Home, Search, PlusSquare, User } from 'lucide-react-native';
 
+import { supabase } from './src/config/supabase';
 import { ReaderPreferencesProvider } from './src/context/ReaderPreferencesContext';
 import { COLORS } from './src/config/theme';
 import AuthScreen from './src/app/AuthScreen';
@@ -143,14 +144,51 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  sessionLoading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
 export default function App() {
+  const [initialRouteName, setInitialRouteName] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (!active) return;
+        if (error) console.error('Error restoring auth session:', error);
+        setInitialRouteName(session ? 'Main' : 'Auth');
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error('Error restoring auth session:', error);
+        setInitialRouteName('Auth');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (!initialRouteName) {
+    return (
+      <ReaderPreferencesProvider>
+        <View style={[styles.sessionLoading, { backgroundColor: COLORS.background }]}>
+          <ActivityIndicator color={COLORS.accent} />
+        </View>
+      </ReaderPreferencesProvider>
+    );
+  }
+
   return (
     <ReaderPreferencesProvider>
       <NavigationContainer>
         <StatusBar style="dark" />
-        <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: COLORS.background } }}>
+        <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: COLORS.background } }}>
           <Stack.Screen name="Auth" component={AuthScreen} />
           <Stack.Screen name="Main" component={MainTabs} />
           <Stack.Screen name="Activity" component={ActivityScreen} />

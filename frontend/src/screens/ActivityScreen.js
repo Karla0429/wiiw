@@ -7,6 +7,8 @@ import BackButton from '../components/BackButton';
 export default function ActivityScreen({ navigation }) {
   const [tab, setTab] = useState('saved');
   const [data, setData] = useState([]);
+  const [likesCount, setLikesCount] = useState(null);
+  const [likesError, setLikesError] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -25,8 +27,20 @@ export default function ActivityScreen({ navigation }) {
         const { data: saved } = await supabase.from('saved_items').select('*').eq('user_id', user.id);
         setData(saved || []);
       } else if (tab === 'likes') {
-        const { data: likes } = await supabase.from('likes').select('*').eq('user_id', user.id);
-        setData(likes || []);
+        setLikesCount(null);
+        setLikesError(false);
+        const { count, error } = await supabase
+          .from('likes')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error loading likes count:', error);
+          setLikesError(true);
+          return;
+        }
+
+        setLikesCount(count);
       } else if (tab === 'comments') {
         const { data: comments } = await supabase.from('comments').select('*').eq('user_id', user.id);
         setData(comments || []);
@@ -46,16 +60,29 @@ export default function ActivityScreen({ navigation }) {
         <TouchableOpacity style={[styles.tab, tab === 'likes' && styles.tabActive]} onPress={() => setTab('likes')}><Text style={styles.tabText}>Likes</Text></TouchableOpacity>
         <TouchableOpacity style={[styles.tab, tab === 'comments' && styles.tabActive]} onPress={() => setTab('comments')}><Text style={styles.tabText}>Comentarios</Text></TouchableOpacity>
       </View>
-      <FlatList
-        data={data}
-        keyExtractor={(item, i) => item.id?.toString() || i.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.itemText}>{tab === 'comments' ? item.content : `ID: ${item.target_id || item.idea_id || item.story_id}`}</Text>
-          </View>
-        )}
-        contentContainerStyle={{ padding: 16 }}
-      />
+      {tab === 'likes' ? (
+        <View style={[styles.item, styles.likesSummary]}>
+          <Text style={styles.likesCount}>
+            {likesError ? '—' : likesCount === null ? '…' : likesCount}
+          </Text>
+          <Text style={styles.itemText}>
+            {likesError
+              ? 'No se pudieron cargar tus likes'
+              : `${likesCount === 1 ? 'like' : 'likes'} que has dado`}
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item, i) => item.id?.toString() || i.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text style={styles.itemText}>{tab === 'comments' ? item.content : `ID: ${item.target_id || item.idea_id || item.story_id}`}</Text>
+            </View>
+          )}
+          contentContainerStyle={{ padding: 16 }}
+        />
+      )}
     </View>
   );
 }
@@ -70,4 +97,6 @@ const styles = StyleSheet.create({
   tabText: { color: COLORS.text },
   item: { backgroundColor: COLORS.surface, padding: 14, borderRadius: 8, marginBottom: 10 },
   itemText: { color: COLORS.text },
+  likesSummary: { margin: 16, alignItems: 'center', paddingVertical: 24 },
+  likesCount: { color: COLORS.text, fontSize: 40, fontWeight: 'bold' },
 });
