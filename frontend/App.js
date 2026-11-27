@@ -25,18 +25,20 @@ const Stack = createNativeStackNavigator();
 
 function WebTabBar({ state, descriptors, navigation }) {
   const { width } = useWindowDimensions();
-  const { colors } = useAppTheme();
+  const { colors, themeName } = useAppTheme();
   const compact = width < 600;
 
   return (
     <View style={[styles.webTabBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       <View style={styles.webTabBarBrand}>
-        <Image
-          source={require('./assets/wiiw-logo.png')}
-          style={[styles.webTabBarLogo, compact && styles.webTabBarLogoCompact]}
-          resizeMode="contain"
-          accessibilityLabel="wiiw"
-        />
+        <View style={[styles.webTabBarLogoBacking, themeName === 'dark' && styles.webTabBarLogoBackingDark]}>
+          <Image
+            source={require('./assets/wiiw-logo.png')}
+            style={[styles.webTabBarLogo, compact && styles.webTabBarLogoCompact]}
+            resizeMode="contain"
+            accessibilityLabel="wiiw"
+          />
+        </View>
       </View>
       <View style={styles.webTabBarItems}>
         {state.routes.map((route, index) => {
@@ -118,6 +120,14 @@ const styles = StyleSheet.create({
   webTabBarLogo: {
     width: 150,
     height: 54,
+  },
+  webTabBarLogoBacking: {
+    alignSelf: 'flex-start',
+  },
+  webTabBarLogoBackingDark: {
+    backgroundColor: '#F7F5F2',
+    borderRadius: 8,
+    padding: 4,
   },
   webTabBarLogoCompact: {
     width: 100,
