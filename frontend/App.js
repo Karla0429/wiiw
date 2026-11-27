@@ -172,6 +172,16 @@ function AppContent() {
   const [initialRouteName, setInitialRouteName] = useState(null);
 
   useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors.background);
+    document.documentElement.style.backgroundColor = colors.background;
+    document.documentElement.style.colorScheme = themeName;
+    document.body.style.backgroundColor = colors.background;
+    document.getElementById('root')?.style.setProperty('background-color', colors.background);
+  }, [colors.background, themeName]);
+
+  useEffect(() => {
     let active = true;
 
     supabase.auth.getSession()
